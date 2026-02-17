@@ -55,3 +55,35 @@ void MAX30101_InitMuscleOx(uint8_t ledPower){
     I2C1_Write(SENSOR_ADDR, LED3_PAMPLI, ledPower);     // Green LED power (medium)
     I2C1_Write(SENSOR_ADDR, DIE_TEMPCFG, 0x01);         // Enable temperature sensor
 }
+
+/**
+ * @brief Returns the number of available samples in the MAX30101 FIFO
+ * @details Reads FIFO_WR_PTR and FIFO_RD_PTR registers to calculate available samples
+ * @param None
+ * @return uint8_t - Number of available samples in the FIFO (0-32)
+ * @note FIFO has 32 sample slots. If write pointer >= read pointer: samples = write - read.
+ *       If write pointer < read pointer: samples = (32 - read) + write (wrap-around case)
+ */
+uint8_t MAX30101_GetNumAvailableSamples(void){
+    uint8_t write_ptr = 0;
+    uint8_t read_ptr = 0;
+    uint8_t num_samples = 0;
+    
+    // Read FIFO write pointer and read pointer from sensor
+    I2C1_Read(SENSOR_ADDR, FIFO_WRITPTR, &write_ptr, 1);
+    I2C1_Read(SENSOR_ADDR, FIFO_READPTR, &read_ptr, 1);
+    
+    // Mask to 5 bits since FIFO pointers are 5 bits (0-31)
+    write_ptr &= 0x1F;
+    read_ptr &= 0x1F;
+    
+    // Calculate available samples
+    if (write_ptr >= read_ptr) {
+        num_samples = write_ptr - read_ptr;
+    } else {
+        num_samples = (32 - read_ptr) + write_ptr;
+    }
+    
+    return num_samples;
+}
+

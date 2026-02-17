@@ -26,9 +26,9 @@ void I2C1_Config(void) {
     RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C1RST;
     // Disable I2C1 to configure it
     I2C1->CR1 &= ~I2C_CR1_PE;
-    // TIMINGR register for 400 kHz with APB1 = 64 MHz
-    // (PRESC=1, SCLDEL=12, SDADEL=7, SCLH=16, SCLL=38)
-    I2C1->TIMINGR = 0x10C71026;
+    // TIMINGR register for 400 kHz with APB1 = 32 MHz
+    // (PRESC=0, SCLDEL=12, SDADEL=5, SCLH=15, SCLL=38)
+    I2C1->TIMINGR = 0x00C50F26;
     // Enable I2C1
     I2C1->CR1 |= I2C_CR1_PE;
 }

@@ -40,6 +40,7 @@
 void MAX30101_Init(void);
 void MAX30101_InitSPO2Lite(void);
 void MAX30101_InitMuscleOx(uint8_t ledPower);
+uint8_t MAX30101_GetNumAvailableSamples(void);
 //void MAX30101_ReadFIFO(uint8_t *buffer, uint8_t size);
 //void MAX30101_ReadTemp(float *temp);
 
