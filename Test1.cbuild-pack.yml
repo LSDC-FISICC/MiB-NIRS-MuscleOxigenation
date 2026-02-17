@@ -3,6 +3,9 @@ cbuild-pack:
     - resolved-pack: ARM::CMSIS@6.3.0
       selected-by-pack:
         - ARM::CMSIS
+    - resolved-pack: ARM::CMSIS-DSP@1.17.0
+      selected-by-pack:
+        - ARM::CMSIS-DSP
     - resolved-pack: Keil::STM32F3xx_DFP@2.2.2
       selected-by-pack:
         - Keil::STM32F3xx_DFP

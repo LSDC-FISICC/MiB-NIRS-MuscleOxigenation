@@ -11,6 +11,8 @@
 #define MAX30101_H_
 
 #include <stdint.h>
+#include "arm_math.h"
+
 #define		SENSOR_ADDR 		0xAE
 
 #define		INTR_STATUS1		0x00
@@ -36,12 +38,63 @@
 #define     DIE_TEMPCFG			0x21
 
 #define     BUFFERBLOCKSIZE     0x8
+#define     MAX30101_ADC_VREF   3.3f        /**< ADC reference voltage in volts */
+#define     MAX30101_ADC_BITS   16          /**< ADC resolution in bits */
+#define     MAX30101_ADC_MAX    ((1 << MAX30101_ADC_BITS) - 1)  /**< Max ADC count (65535 for 16-bit) */
+#define     MAX30101_CURRENT_LSB_PA  7.81f  /**< LSB size in picoamps (pA) */
+#define     MAX30101_CURRENT_LSB_NA  (MAX30101_CURRENT_LSB_PA / 1000.0f)  /**< LSB size in nanoamps (nA) */
+#define     MAX30101_CURRENT_FULLSCALE  2048.0f  /**< Full scale current range in nanoamps (nA) */
 
-void MAX30101_Init(void);
+/**
+ * @struct MAX30101_Sample
+ * @brief Holds one complete sample from MAX30101 FIFO in multi-LED mode
+ * @details Each channel (Red, IR, Green) is stored as a 2-byte value (16-bit)
+ */
+typedef struct {
+    uint8_t red[2];      /**< Red LED sample (2 bytes) */
+    uint8_t ir[2];       /**< IR LED sample (2 bytes) */
+    uint8_t green[2];    /**< Green LED sample (2 bytes) */
+} MAX30101_Sample;
+
+/**
+ * @struct MAX30101_SampleData
+ * @brief Holds one complete sample with 2-byte values converted to uint16_t
+ * @details Each channel is converted from 2 bytes to a 16-bit value in uint16_t
+ */
+typedef struct {
+    uint16_t red;        /**< Red LED 16-bit value as uint16_t */
+    uint16_t ir;         /**< IR LED 16-bit value as uint16_t */
+    uint16_t green;      /**< Green LED 16-bit value as uint16_t */
+} MAX30101_SampleData;
+
+/**
+ * @struct MAX30101_SampleVoltage
+ * @brief Holds one complete sample with data converted to voltage (V)
+ * @details Each channel value is converted to voltage using ADC reference voltage
+ */
+typedef struct {
+    float red;           /**< Red LED voltage in volts */
+    float ir;            /**< IR LED voltage in volts */
+    float green;         /**< Green LED voltage in volts */
+} MAX30101_SampleVoltage;
+
+/**
+ * @struct MAX30101_SampleCurrent
+ * @brief Holds one complete sample with data converted to current (nA)
+ * @details Each channel value is converted to current in nanoamps using LSB size
+ */
+typedef struct {
+    float32_t red;       /**< Red LED current in nanoamps (nA) */
+    float32_t ir;        /**< IR LED current in nanoamps (nA) */
+    float32_t green;     /**< Green LED current in nanoamps (nA) */
+} MAX30101_SampleCurrent;
+
 void MAX30101_InitSPO2Lite(void);
 void MAX30101_InitMuscleOx(uint8_t ledPower);
 uint8_t MAX30101_GetNumAvailableSamples(void);
-//void MAX30101_ReadFIFO(uint8_t *buffer, uint8_t size);
+void MAX30101_ReadFIFO(MAX30101_Sample *samples, uint8_t num_samples);
+void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleData *sample_out);
+void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_SampleCurrent *sample_out);
 //void MAX30101_ReadTemp(float *temp);
 
 #endif /* MAX30101_H_ */  

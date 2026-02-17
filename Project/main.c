@@ -16,6 +16,8 @@
 #include "I2C.h"
 #include "MAX30101.h"
 
+#include "arm_math.h"
+
 uint32_t counter = 0;
 uint32_t ticks = 0;
 

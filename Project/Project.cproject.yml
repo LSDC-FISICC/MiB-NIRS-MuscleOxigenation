@@ -17,6 +17,7 @@ project:
   components:
     - component: ARM::CMSIS:CORE
     - component: Device&Standalone:Startup
+    - component: CMSIS:DSP&Source
 
   # List executable file formats to be generated.
   output:
@@ -24,3 +25,5 @@ project:
       - elf
       - hex
       - map
+  packs:
+    - pack: ARM::CMSIS-DSP
