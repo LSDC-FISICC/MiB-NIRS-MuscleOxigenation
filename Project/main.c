@@ -9,7 +9,6 @@
     * The MAX30101 is configured to use 3 LEDs (Red, IR, Green) with a sample rate of 100 Hz and medium LED power for optimal tissue penetration in muscle applications.
 */
 
-#include "arm_math_types.h"
 #include "stm32f303x8.h"
 #include <stdint.h>
 
@@ -22,8 +21,12 @@
 uint32_t counter = 0;
 uint32_t ticks = 0;
 
-// Global variable to hold the latest sample data in float format (current in nanoamps)
-MAX30101_SampleCurrent MAX30101_SampleCurrentData = {0.0f, 0.0f, 0.0f};  /**< Global variable to hold converted current values in nanoamps (nA) */
+// Global buffer to hold raw FIFO data read from the sensor (8 bytes per sample for 3 channels)
+MAX30101_Sample MAX30101_FIFO_Buffer[8];
+// Global buffer to hold converted sample data in uint16_t format 
+MAX30101_SampleData MAX30101_SampleDataBuffer[8];
+// Global buffer to hold the latest sample data in float format (current in nanoamps)
+MAX30101_SampleCurrent MAX30101_SampleCurrentBuffer[8];
 
 void clk_config(void);
 
@@ -58,8 +61,13 @@ int main() {
 
 void SysTick_Handler(void) {
     ticks++;
+    uint8_t available_samples = MAX30101_GetNumAvailableSamples();
+    if (available_samples > 0) {
+        // Read available samples from the MAX30101 FIFO in float format (nA) into the global buffer
+        MAX30101_ReadFIFO_Current(MAX30101_SampleCurrentBuffer, available_samples);
+    }
     LED_Toggle();
-    
+
 }
 
 /** 

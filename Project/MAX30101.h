@@ -82,6 +82,7 @@ void MAX30101_InitSPO2Lite(void);
 void MAX30101_InitMuscleOx(uint8_t ledPower);
 uint8_t MAX30101_GetNumAvailableSamples(void);
 void MAX30101_ReadFIFO(MAX30101_Sample *samples, uint8_t num_samples);
+void MAX30101_ReadFIFO_Current(MAX30101_SampleCurrent *samples, uint8_t num_samples);
 void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleData *sample_out);
 void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_SampleCurrent *sample_out);
 //void MAX30101_ReadTemp(float *temp);

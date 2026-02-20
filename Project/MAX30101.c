@@ -82,7 +82,7 @@ uint8_t MAX30101_GetNumAvailableSamples(void){
  */
 void MAX30101_ReadFIFO(MAX30101_Sample *samples, uint8_t num_samples){
     uint8_t i = 0;
-    uint8_t fifo_data[6];  // 6 bytes per complete sample (3 channels × 2 bytes)
+    uint8_t fifo_data[8];  // 6 bytes per complete sample (3 channels × 2 bytes)
     
     for (i = 0; i < num_samples; i++) {
         // Read 6 consecutive bytes from FIFO_DATAREG
@@ -145,3 +145,32 @@ void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_Sa
     sample_out->green = (float32_t)sample_in->green * MAX30101_CURRENT_LSB_NA;
 }
 
+/**
+ * @brief Read FIFO and convert directly to current (nA)
+ * @details This helper combines ReadFIFO, conversion to uint16, and scaling to nA
+ *          in a single loop to minimize intermediate storage and processing.
+ * @param samples - Pointer to array of MAX30101_SampleCurrent to fill
+ * @param num_samples - Number of complete samples to read
+ * @return None
+ * @note Each sample still uses 6 bytes (2 bytes per channel). Conversion
+ *       performed on-the-fly without creating SampleData structures.
+ */
+void MAX30101_ReadFIFO_Current(MAX30101_SampleCurrent *samples, uint8_t num_samples){
+    uint8_t fifo_data[6];
+    uint8_t i;
+    uint16_t temp;
+    
+    for(i = 0; i < num_samples; i++){
+        // read 6 bytes from FIFO
+        I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 6);
+        // combine bytes and convert right away
+        temp = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
+        samples[i].red = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+        
+        temp = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
+        samples[i].ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+        
+        temp = ((uint16_t)fifo_data[4] << 8) | fifo_data[5];
+        samples[i].green = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+    }
+}
