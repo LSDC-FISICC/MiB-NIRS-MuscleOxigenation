@@ -10,7 +10,6 @@
 #define UART_H_
 
 #include <stdint.h>
-#include "MAX30101.h"
 
 /**
  * @brief Initialize USART2 for 230400 baud transmission

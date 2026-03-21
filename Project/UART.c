@@ -2,8 +2,6 @@
 #include "stm32f303x8.h"
 #include "system_stm32f3xx.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 /**
  * @brief Initialize USART2 for 230400 baud transmission
