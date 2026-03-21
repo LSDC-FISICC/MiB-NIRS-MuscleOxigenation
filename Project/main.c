@@ -70,10 +70,10 @@ int main() {
     LED_config();
     // Configure I2C1 for communication with the MAX30101 sensor
     I2C1_Config();
+    // Initialize MAX30101 for SPO2 measurement with medium LED power
+    MAX30101_InitSPO2Lite(0x4B);
     // Configure UART2 (PA2=TX, PA15=RX) at 230400 baud
     UART_Config(230400 );
-    // Initialize MAX30101 for SPO2 measurement with low LED power
-    MAX30101_InitSPO2Lite(0x4B);
     // Configure SysTick to generate an interrupt at SYSTICK_FREQ_HZ (50 Hz = 20 ms)
     SysTick_Config(SystemCoreClock / SYSTICK_FREQ_HZ);
 
