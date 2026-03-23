@@ -1,7 +1,15 @@
+/**
+ * @file I2C.c
+ * @brief I2C1 Master communication driver implementation for STM32F303K8
+ * @details Low-level I2C driver for sensor communication at 400 kHz using open-drain GPIO.
+ * @author Julio Fajardo, PhD
+ * @date 2024-06-01
+ * @version 2.0
+ */
+
 #include "I2C.h"
 #include "stm32f303x8.h"
 
-/**
 /**
  * @brief Initialize I2C1 peripheral and GPIO pins for 400 kHz master-mode operation
  * @details Complete I2C1 setup sequence:

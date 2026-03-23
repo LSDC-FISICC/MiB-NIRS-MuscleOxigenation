@@ -1,3 +1,12 @@
+/**
+ * @file LED.c
+ * @brief GPIO-Based status LED control implementation for STM32F303K8
+ * @details Simple push-pull GPIO driver for visual feedback LED on port PB3.
+ * @author Julio Fajardo, PhD
+ * @date 2024-06-01
+ * @version 1.0
+ */
+
 #include "LED.h"
 #include "stm32f303x8.h"
 
@@ -70,35 +79,13 @@ void LED_config(void) {
 }
 
 /**
- * @brief Drive PB3 output HIGH (LED on)
+ * @brief Drive PB3 output HIGH (turn LED on)
  * @details Sets GPIO output data register bit 3 to logical HIGH (3.3 V).
- *          Push-pull driver sources current through pin; externally pulled to ground
- *          through LED + resistor for LED to illuminate.
+ *          Push-pull driver sources current for LED to illuminate.
  *
  * @param None
  * @return void
- *
- * @operation
- *  - GPIOB->ODR |= (1<<3)  (Bitwise OR with mask 0x0008)
- *  - Sets bit [3] and preserves all other ODR bits
- *  - Latency: ~1 CPU cycle + ~1 GPIO latch delay ≈ 30 ns @ 64 MHz
- *  - Non-blocking; function returns immediately
- *
- * @output_state
- *  - PB3 voltage: 3.1-3.3 V (HIGH)
- *  - PB3 current: +3 to +25 mA (source capability, max = pin limit)
- *  - Typical LED current: 10-20 mA (limited by resistor R = (3.3V - V_LED) / I_LED)
- *  - LED illuminates (assuming proper hardware circuit)
- *
- * @safe_repeated_calls
- *  - Yes: Bitwise OR with same bit is idempotent
- *  - Calling LED_On() when already ON has no effect (bit already set)
- *  - No race conditions (single bit write in single cycle)
- *
- * @power_note
- *  - Active HIGH state: pin sources 10-20 mA (via LED)
- *  - GPIO push-pull driver: ~3-5 mA internal power to drive pin HIGH
- *
+ * @timing ~30 ns latency
  * @see LED_Off, LED_Toggle, LED_config
  */
 void LED_On(void) {
@@ -106,35 +93,13 @@ void LED_On(void) {
 }   
 
 /**
- * @brief Drive PB3 output LOW (LED off)
+ * @brief Drive PB3 output LOW (turn LED off)
  * @details Clears GPIO output data register bit 3 to logical LOW (0 V).
- *          Push-pull driver sinks current from pin; LED reverse-biases
- *          (no current through LED → LED extinguishes).
+ *          LED current stops and LED extinguishes.
  *
  * @param None
  * @return void
- *
- * @operation
- *  - GPIOB->ODR &= ~(1<<3)  (Bitwise AND with inverted mask ≈ AND with 0xFFF7)
- *  - Clears bit [3] and preserves all other ODR bits
- *  - Latency: ~1 CPU cycle + ~1 GPIO latch delay ≈ 30 ns @ 64 MHz
- *  - Non-blocking; function returns immediately
- *
- * @output_state
- *  - PB3 voltage: 0.0-0.2 V (LOW)
- *  - PB3 current: -3 to -25 mA (sink capability; negative = into pin from external)
- *  - LED current: 0 mA (reverse bias; diode blocks current)
- *  - LED extinguishes (assuming proper hardware circuit with series resistor)
- *
- * @safe_repeated_calls
- *  - Yes: Bitwise AND is idempotent
- *  - Calling LED_Off() when already OFF has no effect (bit already clear)
- *  - No race conditions (single bit write in single cycle)
- *
- * @power_note
- *  - Idle LOW state: pin sinks 0 mA (no LED current)
- *  - GPIO push-pull driver: ~1-2 mA internal power to hold pin LOW
- *
+ * @timing ~30 ns latency
  * @see LED_On, LED_Toggle, LED_config
  */
 void LED_Off(void) {
@@ -142,60 +107,15 @@ void LED_Off(void) {
 }
 
 /**
- * @brief Invert PB3 output state (if HIGH → LOW; if LOW → HIGH)
- * @details Uses exclusive OR (XOR) to toggle GPIO output data register bit 3.
- *          Best practice for periodic blinking; used in SysTick ISR for 5 Hz visual feedback.
+ * @brief Toggle PB3 output state (if HIGH → LOW; else LOW → HIGH)
+ * @details Inverts LED state via XOR operation on GPIO output data register.
+ *          Ideal for periodic blinking feedback in SysTick ISR.
  *
  * @param None
  * @return void
- *
- * @operation
- *  - GPIOB->ODR ^= (1<<3)  (Bitwise XOR with mask 0x0008)
- *  - Flips bit [3]; all other ODR bits unchanged
- *  - Latency: ~2 CPU cycles (RMW = Read-Modify-Write)
- *    1. Read current ODR value
- *    2. XOR with 0x0008 (toggle bit 3)
- *    3. Write back to ODR
- *  - Total ≈ 30-50 ns @ 64 MHz (limited by GPIO latch delay, not CPU)
- *  - Non-blocking; function returns immediately
- *
- * @output_behavior
- *  | Current State | New State | LED |
- *  |---------------|-----------|------|
- *  | HIGH (3.3 V)  | LOW (0 V) | OFF |
- *  | LOW (0 V)     | HIGH (3.3 V) | ON |
- *
- * @call_context
- *  - **Primary**: SysTick_Handler() every 100 ms
- *  - **Frequency**: ~10 Hz on-off transitions (20 Hz blink rate with 50/50 duty)
- *  - **Visual effect**: 5 Hz blink (on 100 ms, off 100 ms)
- *  - Confirms system is alive and sampling running
- *
- * @timing_example
- *  ```
- *  SysTick_Handler()  T=0 ms:    LED_Toggle() → if was ON, turn OFF
- *  SysTick_Handler()  T=100 ms:  LED_Toggle() → if was OFF, turn ON
- *  SysTick_Handler()  T=200 ms:  LED_Toggle() → if was ON, turn OFF
- *  ...produces 5 Hz blink (100 ms on, 100 ms off)
- *  ```
- *
- * @atomic_safe
- *  - Yes for single-pin toggle (RMW on single bit)
- *  - ISR-safe: Even if main loop calls LED_On/Off while ISR calls Toggle,
- *    worst case is transient misalignment; not critical for visual feedback
- *
- * @power_note
- *  - Toggles between ON (~15 mA LED) and OFF (~0 mA LED)
- *  - Average power @ 5 Hz blink: ~7.5 mA (50% duty)
- *  - Negligible compared to sensor (entire system ~30-50 mA total)
- *
- * @intr_usage
- *  - Called from: SysTick_Handler() (100 ms period)
- *  - No blocking or busy-waits (safe for ISR context)
- *  - No global state modified except GPIO ODR
- *  - No race conditions (GPIO ODR RMW is atomic per bit)
- *
- * @see LED_On, LED_Off, LED_config, SysTick_Handler
+ * @timing ~30-50 ns latency
+ * @note Called from SysTick_Handler() for visual feedback
+ * @see LED_On, LED_Off, LED_config
  */
 void LED_Toggle(void) {
     GPIOB->ODR ^= (1<<3);

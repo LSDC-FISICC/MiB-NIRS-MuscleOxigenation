@@ -1,3 +1,13 @@
+/**
+ * @file MAX30101.c
+ * @brief MAX30101 optical biosensor driver implementation for NIRS measurements
+ * @details Complete driver for Maxim Integrated MAX30101 optical sensor supporting
+ *          multi-LED and SpO2 measurement modes with I2C communication interface.
+ * @author Julio Fajardo, PhD
+ * @date 2024-06-01
+ * @version 2.0
+ */
+
 #include "MAX30101.h"
 #include "I2C.h"
 #include <stdint.h>
@@ -20,15 +30,23 @@
  *   MAX30101_InitSPO2Lite(0x18);
  *   uint8_t samples = MAX30101_GetNumAvailableSamples();
  */
-void MAX30101_InitSPO2Lite(uint8_t ledPower){
-    I2C1_Write(SENSOR_ADDR, FIFO_CONFIG, 0x10);      // no FIFO avg, FIFO rollover enabled
-    I2C1_Write(SENSOR_ADDR, MODE_CONFIG, 0x03);      // SPO2 Mode (Red + IR)
-    I2C1_Write(SENSOR_ADDR, SPO2_CONFIG, 0x01);      // 2048 range, sample rate 50 Hz, pulse width 118 us (16 bits)
-    I2C1_Write(SENSOR_ADDR, FIFO_READPTR, 0x0);      // Reset FIFO read pointer
-    I2C1_Write(SENSOR_ADDR, FIFO_WRITPTR, 0x0);      // Reset FIFO write pointer
-    I2C1_Write(SENSOR_ADDR, LED1_PAMPLI, ledPower);  // Red LED power
-    I2C1_Write(SENSOR_ADDR, LED2_PAMPLI, ledPower);  // IR LED power
-    I2C1_Write(SENSOR_ADDR, DIE_TEMPCFG, 0x01);      // Enable temperature sensor
+void MAX30101_InitSPO2Lite(uint8_t ledPower) {
+    // Configure FIFO: no averaging, rollover enabled
+    I2C1_Write(SENSOR_ADDR, FIFO_CONFIG, 0x10);
+    // Select SpO2 mode (Red + IR)
+    I2C1_Write(SENSOR_ADDR, MODE_CONFIG, 0x03);
+    // SpO2 config: 2048 nA range, 50 Hz sample rate, 118 µs pulse width
+    I2C1_Write(SENSOR_ADDR, SPO2_CONFIG, 0x01);
+    // Reset FIFO read pointer
+    I2C1_Write(SENSOR_ADDR, FIFO_READPTR, 0x0);
+    // Reset FIFO write pointer
+    I2C1_Write(SENSOR_ADDR, FIFO_WRITPTR, 0x0);
+    // Set Red LED power
+    I2C1_Write(SENSOR_ADDR, LED1_PAMPLI, ledPower);
+    // Set IR LED power
+    I2C1_Write(SENSOR_ADDR, LED2_PAMPLI, ledPower);
+    // Temperature sensor can be enabled if needed
+    // I2C1_Write(SENSOR_ADDR, DIE_TEMPCFG, 0x01);
 }
 
 /**
@@ -52,16 +70,25 @@ void MAX30101_InitSPO2Lite(uint8_t ledPower){
  *   uint8_t available = MAX30101_GetNumAvailableSamples();
  *   MAX30101_ReadFIFO_Current(current_buffer, available);
  */
-void MAX30101_InitMuscleOx(uint8_t ledPower){
-    I2C1_Write(SENSOR_ADDR, FIFO_CONFIG, 0x10);         // no FIFO avg, FIFO rollover enabled
-    I2C1_Write(SENSOR_ADDR, MODE_CONFIG, 0x07);         // Multi-LED mode (Red + IR + Green)
-    I2C1_Write(SENSOR_ADDR, SPO2_CONFIG, 0x01);         // 2048 range, sample rate 50 Hz, pulse width 118 us (16 bits)
-    I2C1_Write(SENSOR_ADDR, FIFO_READPTR, 0x0);         // Reset FIFO read pointer
-    I2C1_Write(SENSOR_ADDR, FIFO_WRITPTR, 0x0);         // Reset FIFO write pointer 
-    I2C1_Write(SENSOR_ADDR, LED1_PAMPLI, ledPower);     // Red LED power (medium)
-    I2C1_Write(SENSOR_ADDR, LED2_PAMPLI, ledPower);     // IR LED power (medium)
-    I2C1_Write(SENSOR_ADDR, LED3_PAMPLI, ledPower);     // Green LED power (medium)
-    I2C1_Write(SENSOR_ADDR, DIE_TEMPCFG, 0x01);         // Enable temperature sensor
+void MAX30101_InitMuscleOx(uint8_t ledPower) {
+    // Configure FIFO: no averaging, rollover enabled
+    I2C1_Write(SENSOR_ADDR, FIFO_CONFIG, 0x10);
+    // Select multi-LED mode (Red + IR + Green)
+    I2C1_Write(SENSOR_ADDR, MODE_CONFIG, 0x07);
+    // SpO2 config: 2048 nA range, 50 Hz sample rate, 118 µs pulse width
+    I2C1_Write(SENSOR_ADDR, SPO2_CONFIG, 0x01);
+    // Reset FIFO read pointer
+    I2C1_Write(SENSOR_ADDR, FIFO_READPTR, 0x0);
+    // Reset FIFO write pointer
+    I2C1_Write(SENSOR_ADDR, FIFO_WRITPTR, 0x0);
+    // Set Red LED power
+    I2C1_Write(SENSOR_ADDR, LED1_PAMPLI, ledPower);
+    // Set IR LED power
+    I2C1_Write(SENSOR_ADDR, LED2_PAMPLI, ledPower);
+    // Set Green LED power
+    I2C1_Write(SENSOR_ADDR, LED3_PAMPLI, ledPower);
+    // Temperature sensor can be enabled if needed
+    // I2C1_Write(SENSOR_ADDR, DIE_TEMPCFG, 0x01);
 }
 
 /**
@@ -83,20 +110,20 @@ void MAX30101_InitMuscleOx(uint8_t ledPower){
  *       MAX30101_ReadFIFO_Current(samples, count);
  *   }
  */
-uint8_t MAX30101_GetNumAvailableSamples(void){
+uint8_t MAX30101_GetNumAvailableSamples(void) {
     uint8_t write_ptr = 0;
     uint8_t read_ptr = 0;
     uint8_t num_samples = 0;
     
-    // Read FIFO write pointer and read pointer from sensor
+    // Read FIFO write and read pointers from sensor
     I2C1_Read(SENSOR_ADDR, FIFO_WRITPTR, &write_ptr, 1);
     I2C1_Read(SENSOR_ADDR, FIFO_READPTR, &read_ptr, 1);
     
-    // Mask to 5 bits since FIFO pointers are 5 bits (0-31)
+    // Mask to 5 bits (FIFO pointers are 5-bit: 0-31)
     write_ptr &= 0x1F;
     read_ptr &= 0x1F;
     
-    // Calculate available samples
+    // Calculate number of available samples (handles wrap-around)
     if (write_ptr >= read_ptr) {
         num_samples = write_ptr - read_ptr;
     } else {
@@ -107,41 +134,98 @@ uint8_t MAX30101_GetNumAvailableSamples(void){
 }
 
 /**
- * @brief Read raw FIFO data from MAX30101 (intermediate format)
- * @details Streams raw 2-byte ADC samples sequentially from each channel.
- *          Data is organized as: Red(2B) IR(2B) Green(2B) repeating.
- *          Each complete sample requires 6 bytes from FIFO.
- * @param samples - [out] Pointer to buffer of MAX30101_Sample structures to populate
- * @param num_samples - [in] Number of complete samples to read (max 32)
+ * @brief Update the FIFO read pointer
+ * @details Advances the read pointer by a specified number of samples, wrapping around at 32.
+ * @param num_samples - [in] Number of samples to advance the read pointer
  * @return void
- * @retval N/A
- * @note This is the lowest-level FIFO read. For processed data in nanoamps,
- *       use MAX30101_ReadFIFO_Current() instead to skip intermediate conversion.
- * @warning Ensure buffer has capacity for num_samples structures.
- * @see MAX30101_ReadFIFO_Current, MAX30101_ConvertSampleToUint16
- * @example
- *   MAX30101_Sample raw[32];
- *   MAX30101_ReadFIFO(raw, 5);  // Read 5 samples
  */
-void MAX30101_ReadFIFO(MAX30101_Sample *samples, uint8_t num_samples){
-    uint8_t i = 0;
-    uint8_t fifo_data[8];  // 6 bytes per complete sample (3 channels × 2 bytes)
-    
-    for (i = 0; i < num_samples; i++) {
-        // Read 6 consecutive bytes from FIFO_DATAREG
-        // Each I2C read from address 0x07 gets the next byte in the FIFO
-        I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 6);
-        
-        // Store the 2-byte samples for each channel
-        samples[i].red[0] = fifo_data[0];
-        samples[i].red[1] = fifo_data[1];
-        
-        samples[i].ir[0] = fifo_data[2];
-        samples[i].ir[1] = fifo_data[3];
-        
-        samples[i].green[0] = fifo_data[4];
-        samples[i].green[1] = fifo_data[5];
-    }
+void MAX30101_UpdateReadPointer(uint8_t num_samples) {
+    uint8_t read_ptr = 0;
+    // Read current FIFO read pointer
+    I2C1_Read(SENSOR_ADDR, FIFO_READPTR, &read_ptr, 1);
+    // Advance pointer by num_samples with wrap-around at 32
+    read_ptr = (read_ptr + num_samples) % 32;
+    // Write updated pointer back to sensor
+    I2C1_Write(SENSOR_ADDR, FIFO_READPTR, read_ptr);
+}
+
+/**
+ * @brief Convert raw SpO2 sample bytes to 16-bit ADC counts
+ * @details Combines 2-byte pairs (MSB, LSB) into 16-bit values per channel.
+ *
+ * @param sample_in - [in] Pointer to MAX30101_SampleSpO2 with raw data
+ * @param sample_out - [out] Pointer to MAX30101_SampleDataSpO2 for counts (0-65535)
+ * @return void
+ * @see MAX30101_ConvertUint16ToCurrentSpO2
+ */
+void MAX30101_ConvertSampleToUint16SpO2(MAX30101_SampleSpO2 *sample_in, MAX30101_SampleDataSpO2 *sample_out) {
+    // Convert Red LED bytes to 16-bit ADC count
+    sample_out->red = ((uint16_t)sample_in->red[0] << 8) | ((uint16_t)sample_in->red[1]);
+    // Convert IR LED bytes to 16-bit ADC count
+    sample_out->ir = ((uint16_t)sample_in->ir[0] << 8) | ((uint16_t)sample_in->ir[1]);
+}
+
+/**
+ * @brief Convert 16-bit SpO2 ADC samples to calibrated current in nanoamps
+ * @details Scales ADC counts using 7.81 pA LSB to nA range (0-2048 nA).
+ *
+ * @param sample_in - [in] Pointer to MAX30101_SampleDataSpO2 with ADC counts
+ * @param sample_out - [out] Pointer to MAX30101_SampleCurrentSpO2 for current (nA)
+ * @return void
+ * @see MAX30101_ReadFIFO_CurrentSpO2
+ */
+void MAX30101_ConvertUint16ToCurrentSpO2(MAX30101_SampleDataSpO2 *sample_in, MAX30101_SampleCurrentSpO2 *sample_out) {
+    // Scale Red LED ADC count to current (nanoamps)
+    sample_out->red = (float32_t)sample_in->red * MAX30101_CURRENT_LSB_NA;
+    // Scale IR LED ADC count to current (nanoamps)
+    sample_out->ir = (float32_t)sample_in->ir * MAX30101_CURRENT_LSB_NA;
+}
+
+/**
+ * @brief Read single SpO2 sample from MAX30101 FIFO as 16-bit ADC counts
+ * @details Optimized function for reading one sample at a time.
+ *          Reads 4 bytes from FIFO and returns as raw 16-bit ADC values (0-65535).
+ *
+ * @param sample - [out] Pointer to MAX30101_SampleDataSpO2 for result
+ * @return void
+ * @see MAX30101_ReadFIFO_DataSpO2, MAX30101_GetNumAvailableSamples
+ */
+void MAX30101_ReadSingleDataSpO2(MAX30101_SampleDataSpO2 *sample) {
+    uint8_t fifo_data[4];
+
+    // Read 4 bytes from FIFO data register
+    I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 4);
+
+    // Convert Red LED: combine bytes to 16-bit unsigned value
+    sample->red = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
+
+    // Convert IR LED: combine bytes to 16-bit unsigned value
+    sample->ir = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
+}
+
+/**
+ * @brief Read single SpO2 sample from MAX30101 FIFO with current conversion
+ * @details Optimized function for reading one sample at a time.
+ *          Reads 4 bytes from FIFO and converts to nA immediately.
+ *
+ * @param sample - [out] Pointer to MAX30101_SampleCurrentSpO2 for result
+ * @return void
+ * @see MAX30101_ReadFIFO_CurrentSpO2, MAX30101_GetNumAvailableSamples
+ */
+void MAX30101_ReadSingleCurrentSpO2(MAX30101_SampleCurrentSpO2 *sample) {
+    uint8_t fifo_data[4];
+    uint16_t temp;
+
+    // Read 4 bytes from FIFO data register
+    I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 4);
+
+    // Convert Red LED: combine bytes and scale to nanoamps
+    temp = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
+    sample->red = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+
+    // Convert IR LED: combine bytes and scale to nanoamps
+    temp = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
+    sample->ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
 }
 
 /**
@@ -162,16 +246,16 @@ void MAX30101_ReadFIFO(MAX30101_Sample *samples, uint8_t num_samples){
  *   MAX30101_ReadFIFO(&raw, 1);
  *   MAX30101_ConvertSampleToUint16(&raw, &counts);  // counts.red = 0-65535
  */
-void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleData *sample_out){
-    // Convert Red LED: combine 2 bytes into 16-bit uint16_t
+void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleData *sample_out) {
+    // Convert Red LED bytes to 16-bit ADC count
     sample_out->red = ((uint16_t)sample_in->red[0] << 8) | 
                       ((uint16_t)sample_in->red[1]);
     
-    // Convert IR LED: combine 2 bytes into 16-bit uint16_t
+    // Convert IR LED bytes to 16-bit ADC count
     sample_out->ir = ((uint16_t)sample_in->ir[0] << 8) | 
                      ((uint16_t)sample_in->ir[1]);
     
-    // Convert Green LED: combine 2 bytes into 16-bit uint16_t
+    // Convert Green LED bytes to 16-bit ADC count
     sample_out->green = ((uint16_t)sample_in->green[0] << 8) | 
                         ((uint16_t)sample_in->green[1]);
 }
@@ -195,127 +279,42 @@ void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleD
  *   MAX30101_ConvertUint16ToCurrent(&adc_counts, &current);
  *   printf("Red LED: %f nA\n", current.red);  // Output in nanoamps
  */
-void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_SampleCurrent *sample_out){
-    // Convert Red channel ADC count to current in nanoamps
+void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_SampleCurrent *sample_out) {
+    // Scale Red LED ADC count to current (nanoamps)
     sample_out->red = (float32_t)sample_in->red * MAX30101_CURRENT_LSB_NA;
     
-    // Convert IR channel ADC count to current in nanoamps
+    // Scale IR LED ADC count to current (nanoamps)
     sample_out->ir = (float32_t)sample_in->ir * MAX30101_CURRENT_LSB_NA;
     
-    // Convert Green channel ADC count to current in nanoamps
+    // Scale Green LED ADC count to current (nanoamps)
     sample_out->green = (float32_t)sample_in->green * MAX30101_CURRENT_LSB_NA;
 }
 
 /**
- * @brief Optimized single-step FIFO read with direct nanoamp conversion
- * @details Combines all processing in one loop:
- *          1. Read 6 raw bytes from FIFO per sample
- *          2. Combine bytes to 16-bit ADC counts
- *          3. Scale to current (nA) using LSB=7.81 pA
- *          Output directly in calibrated units without intermediate storage.
- * @param samples - [out] Pointer to buffer of MAX30101_SampleCurrent to populate
- * @param num_samples - [in] Number of complete samples to read and convert (max 32)
+ * @brief Read single multi-LED sample from MAX30101 FIFO with current conversion
+ * @details Optimized function for reading one sample at a time.
+ *          Reads 6 bytes from FIFO (Red, IR, Green) and converts to nA immediately.
+ *
+ * @param sample - [out] Pointer to MAX30101_SampleCurrent for result
  * @return void
- * @retval N/A
- * @note RECOMMENDED function for typical usage. Minimizes memory usage and processing
- *       overhead compared to three-step pipeline (Read → uint16 → nanoamps).
- * @warning Ensure output buffer has capacity for num_samples structures.
- *          Total bytes read from FIFO: num_samples × 6
- * @performance ~15-20% faster and ~24 bytes less stack vs separate conversions
- * @see MAX30101_GetNumAvailableSamples
- * @example
- *   MAX30101_SampleCurrent buf[32];
- *   uint8_t available = MAX30101_GetNumAvailableSamples();
- *   if (available) {
- *       MAX30101_ReadFIFO_Current(buf, available);
- *       // buf[0].red contains Red LED current in nanoamps
- *       // buf[0].ir contains IR LED current in nanoamps
- *       // buf[0].green contains Green LED current in nanoamps
- *   }
+ * @see MAX30101_ReadFIFO_Current, MAX30101_GetNumAvailableSamples
  */
-void MAX30101_ReadFIFO_Current(MAX30101_SampleCurrent *samples, uint8_t num_samples){
+void MAX30101_ReadSingleCurrent(MAX30101_SampleCurrent *sample) {
     uint8_t fifo_data[6];
-    uint8_t i;
-    uint16_t temp;
-    
-    for(i = 0; i < num_samples; i++){
-        // read 6 bytes from FIFO
-        I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 6);
-        // combine bytes and convert right away
-        temp = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
-        samples[i].red = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
-        
-        temp = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
-        samples[i].ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
-        
-        temp = ((uint16_t)fifo_data[4] << 8) | fifo_data[5];
-        samples[i].green = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
-    }
-}
-
-/**
- * @brief Read raw FIFO data in SpO2 mode from MAX30101
- * @details SpO2 mode streams only Red and IR 2-byte samples.
- *          Each complete sample is 4 bytes: Red(2B) IR(2B).
- * @param samples - [out] Pointer to buffer of MAX30101_SampleSpO2 structures to populate
- * @param num_samples - [in] Number of complete samples to read (max 32)
- * @return void
- * @warning Ensure buffer has capacity for num_samples structures.
- * @see MAX30101_ReadFIFO_CurrentSpO2, MAX30101_ConvertSampleToUint16SpO2
- */
-void MAX30101_ReadFIFO_SPO2(MAX30101_SampleSpO2 *samples, uint8_t num_samples){
-    uint8_t i = 0;
-    uint8_t fifo_data[4];  // 4 bytes per sample in SpO2 mode (Red + IR)
-
-    for (i = 0; i < num_samples; i++) {
-        I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 4);
-
-        samples[i].red[0] = fifo_data[0];
-        samples[i].red[1] = fifo_data[1];
-        
-        samples[i].ir[0] = fifo_data[2];
-        samples[i].ir[1] = fifo_data[3];
-    }
-}
-
-/**
- * @brief Convert raw SpO2 sample bytes to 16-bit ADC counts
- * @param sample_in - [in] Pointer to MAX30101_SampleSpO2 with raw data
- * @param sample_out - [out] Pointer to MAX30101_SampleDataSpO2 for converted counts
- */
-void MAX30101_ConvertSampleToUint16SpO2(MAX30101_SampleSpO2 *sample_in, MAX30101_SampleDataSpO2 *sample_out){
-    sample_out->red = ((uint16_t)sample_in->red[0] << 8) | ((uint16_t)sample_in->red[1]);
-    sample_out->ir  = ((uint16_t)sample_in->ir[0]  << 8) | ((uint16_t)sample_in->ir[1]);
-}
-
-/**
- * @brief Convert 16-bit SpO2 ADC samples to calibrated current in nA
- * @param sample_in - [in] Pointer to MAX30101_SampleDataSpO2 with ADC counts
- * @param sample_out - [out] Pointer to MAX30101_SampleCurrentSpO2 for nA values
- */
-void MAX30101_ConvertUint16ToCurrentSpO2(MAX30101_SampleDataSpO2 *sample_in, MAX30101_SampleCurrentSpO2 *sample_out){
-    sample_out->red = (float32_t)sample_in->red * MAX30101_CURRENT_LSB_NA;
-    sample_out->ir  = (float32_t)sample_in->ir  * MAX30101_CURRENT_LSB_NA;
-}
-
-/**
- * @brief Optimized SpO2 FIFO read with direct current conversion
- * @details Reads 4-byte SpO2 samples and converts to nA in one pass.
- * @param samples - [out] Pointer to buffer of MAX30101_SampleCurrentSpO2 to populate
- * @param num_samples - [in] Number of complete samples to read (max 32)
- */
-void MAX30101_ReadFIFO_CurrentSpO2(MAX30101_SampleCurrentSpO2 *samples, uint8_t num_samples){
-    uint8_t fifo_data[4];
-    uint8_t i;
     uint16_t temp;
 
-    for (i = 0; i < num_samples; i++) {
-        I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 4);
+    // Read 6 bytes from FIFO data register
+    I2C1_Read(SENSOR_ADDR, FIFO_DATAREG, fifo_data, 6);
 
-        temp = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
-        samples[i].red = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+    // Convert Red LED: combine bytes and scale to nanoamps
+    temp = ((uint16_t)fifo_data[0] << 8) | fifo_data[1];
+    sample->red = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
 
-        temp = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
-        samples[i].ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
-    }
+    // Convert IR LED: combine bytes and scale to nanoamps
+    temp = ((uint16_t)fifo_data[2] << 8) | fifo_data[3];
+    sample->ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
+
+    // Convert Green LED: combine bytes and scale to nanoamps
+    temp = ((uint16_t)fifo_data[4] << 8) | fifo_data[5];
+    sample->green = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
 }

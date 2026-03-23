@@ -1,16 +1,19 @@
-/** 
-    * @file main.c
-    * @brief Main program for MAX30101 muscle oxygenation measurement
-    * @author Julio Fajardo, PhD
-    * @date 2024-06-01
-    * 
-    * This program initializes the MAX30101 sensor for muscle oxygenation measurement using the I2C interface. 
-    * It configures the system clock to 64 MHz, sets up a GPIO pin for an LED indicator, and uses the SysTick timer to toggle the LED every 20 ms.
-    * The MAX30101 is configured to use 2 LEDs (Red, IR) with a sample rate of 100 Hz and medium LED power for optimal tissue penetration in muscle applications.
-*/
+/**
+ * @file main.c
+ * @brief Main program for MAX30101 muscle oxygenation measurement
+ * @details Initializes MAX30101 sensor for NIRS muscle oxygenation using I2C interface.
+ *          Configures system clock to 64 MHz, GPIO LED on PB3, and SysTick timer for 20 ms interrupts.
+ *          MAX30101 configured with dual LEDs (Red, IR) at 100 Hz sample rate and medium LED power
+ *          for optimal tissue penetration in muscle oxygenation applications.
+ * @author Julio Fajardo, PhD
+ * @date 2024-06-01
+ * @version 1.0
+ * @see clk_config, LED_config, I2C1_Config, MAX30101_InitMuscleOx, SysTick_Handler
+ */
 
 #include "stm32f303x8.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #include "PLL.h"
 #include "LED.h"
@@ -25,6 +28,9 @@
 
 uint32_t counter = 0;  /**< Debug counter for main loop iterations (unused in release) */
 uint32_t ticks = 0;    /**< Interrupt tick counter (incremented per 20 ms SysTick at 50 Hz) */
+uint8_t available_samples; /**< Number of samples currently available in MAX30101 FIFO (updated in SysTick_Handler) */
+
+char buffer[100];  /**< General-purpose buffer for UART transmission (not used in current code) */
 
 /**
  * @brief FINAL PROCESSED DATA: Calibrated current in nanoamps (nA)
@@ -36,7 +42,8 @@ uint32_t ticks = 0;    /**< Interrupt tick counter (incremented per 20 ms SysTic
  *          @note Typically accessed in main loop after ISR completion
  */
 MAX30101_SampleCurrentSpO2 MAX30101_SampleCurrentSpO2Buffer[BUFFER_SIZE];
-
+MAX30101_SampleDataSpO2 MAX30101_SingleSampleDataSpO2; 
+MAX30101_SampleCurrentSpO2 MAX30101_SingleSampleCurrentSpO2; 
 
 /**
  * @brief System initialization and main control loop
@@ -62,23 +69,23 @@ MAX30101_SampleCurrentSpO2 MAX30101_SampleCurrentSpO2Buffer[BUFFER_SIZE];
  *   // main() initializes and waits for interrupts
    // SysTick fires every 20 ms with MAXFIFO reads
  */
-int main() {
-
-    // Configure the system clock to 64 MHz
+int main(void) {
+    // Configure system clock to 64 MHz via PLL
     clk_config();
-    // Configure the GPIO pin for the LED on PB3
+    // Configure GPIO port B pin 3 as push-pull output for LED
     LED_config();
-    // Configure I2C1 for communication with the MAX30101 sensor
+    // Configure I2C1 (400 kHz) for MAX30101 communication
     I2C1_Config();
-    // Initialize MAX30101 for SPO2 measurement with medium LED power
-    MAX30101_InitSPO2Lite(0x4B);
-    // Configure UART2 (PA2=TX, PA15=RX) at 230400 baud
-    UART_Config(230400 );
-    // Configure SysTick to generate an interrupt at SYSTICK_FREQ_HZ (50 Hz = 20 ms)
+    // Initialize MAX30101 for SpO2 measurement with medium LED power
+    MAX30101_InitSPO2Lite(0x4B);  
+    // Configure USART2 (PA2=TX, PA15=RX) at 230400 baud for data transmission
+    UART_Config(230400);
+    // Configure SysTick for 20 ms interrupts (SYSTICK_FREQ_HZ = 50 Hz)
     SysTick_Config(SystemCoreClock / SYSTICK_FREQ_HZ);
-
+    
+    // Main loop: real work happens in SysTick_Handler ISR
     for (;;) {
-        counter++;
+        counter++;  // Debug counter (unused in release)
     }
 }
 
@@ -125,10 +132,18 @@ int main() {
  */  
 
 void SysTick_Handler(void) {
+    uint8_t i;
     ticks++;
     LED_Toggle();
-    uint8_t available_samples = MAX30101_GetNumAvailableSamples();
+    available_samples = MAX30101_GetNumAvailableSamples();
     if (available_samples > 0) {
-        MAX30101_ReadFIFO_CurrentSpO2(MAX30101_SampleCurrentSpO2Buffer, available_samples);
+        for(i=0; i<available_samples; i++) {
+            //MAX30101_ReadSingleCurrentSpO2(&MAX30101_SingleSampleCurrentSpO2);
+            MAX30101_ReadSingleDataSpO2(&MAX30101_SingleSampleDataSpO2);
+        }
     }
+    MAX30101_UpdateReadPointer(available_samples);
+    //sprintf(buffer, "%.6f,%.6f\r\n", MAX30101_SingleSampleCurrentSpO2.red, MAX30101_SingleSampleCurrentSpO2.ir);
+    _sprintf(buffer,"%d,%d\r\n", MAX30101_SingleSampleDataSpO2.red, MAX30101_SingleSampleDataSpO2.ir);
+    USART2_putString(buffer);
 }
