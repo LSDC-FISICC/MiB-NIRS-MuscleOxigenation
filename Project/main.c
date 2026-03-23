@@ -139,11 +139,11 @@ void SysTick_Handler(void) {
     if (available_samples > 0) {
         for(i=0; i<available_samples; i++) {
             //MAX30101_ReadSingleCurrentSpO2(&MAX30101_SingleSampleCurrentSpO2);
-            MAX30101_ReadSingleDataSpO2(&MAX30101_SingleSampleDataSpO2);
+            MAX30101_ReadSingleDataSpO2(&MAX30101_SingleSampleDataSpO2); 
         }
     }
     MAX30101_UpdateReadPointer(available_samples);
     //sprintf(buffer, "%.6f,%.6f\r\n", MAX30101_SingleSampleCurrentSpO2.red, MAX30101_SingleSampleCurrentSpO2.ir);
-    _sprintf(buffer,"%d,%d\r\n", MAX30101_SingleSampleDataSpO2.red, MAX30101_SingleSampleDataSpO2.ir);
+    sprintf(buffer,"%d,%d\r\n", MAX30101_SingleSampleDataSpO2.red, MAX30101_SingleSampleDataSpO2.ir);
     USART2_putString(buffer);
 }
