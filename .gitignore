@@ -83,9 +83,6 @@ uv2csolution.log
 *.cprj
 
 # Doxygen generated documentation
-docs/html/
-docs/latex/
-docs/xml/
-docs/rtf/
-docs/man/
-docs/docbook/
+docs/
+html/
+latex/
