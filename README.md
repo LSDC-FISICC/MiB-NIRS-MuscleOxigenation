@@ -4,7 +4,7 @@ A dual-mode firmware application for real-time monitoring of muscle hemodynamics
 ## Overview
 
 This project implements a single-mode optical spectroscopy monitoring:
-- **NIRS Lite Mode** *(active)*: NIRS-based hemodynamics monitoring or pulse oximetry with dual-channel (Red/IR) measurement — current configuration at 1.6 mA per LED
+- **NIRS Lite Mode**: NIRS-based hemodynamics monitoring or pulse oximetry with dual-channel (Red/IR) measurement — current configuration at 1.6 mA per LED
 
 The system uses the Maxim Integrated MAX30101 optical sensor interfaced via I2C to the STM32F303K8 ARM Cortex-M4 microcontroller, achieving real-time 16-bit ADC sampling at 50 Hz with 31.25 pA resolution. Calibrated photodiode current values (nA) are streamed over UART as CSV at 460800 baud.
 
