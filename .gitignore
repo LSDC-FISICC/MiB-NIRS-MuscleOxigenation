@@ -81,3 +81,11 @@ uv2csolution.log
 
 # legacy intermediate project file
 *.cprj
+
+# Doxygen generated documentation
+docs/html/
+docs/latex/
+docs/xml/
+docs/rtf/
+docs/man/
+docs/docbook/
