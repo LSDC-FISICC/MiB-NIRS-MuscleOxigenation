@@ -1,7 +1,7 @@
 /**
  * @file UART.h
  * @brief USART2 driver for MAX30101 data transmission
- * @details Configures USART2 (PA2=TX, PA15=RX) at 230400 baud with blocking transmission
+ * @details Configures USART2 (PA2=TX, PA15=RX) at variable baud rate with blocking transmission
  * @author Julio Fajardo, PhD
  * @date 2024-06-01
  */
@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 /**
- * @brief Initialize USART2 for 230400 baud transmission
+ * @brief Initialize USART2 for configurable baud rate transmission
  * @details Configuration sequence:
  *          1. Enable clocks: USART2, GPIOA
  *          2. Configure PA2 (TX) and PA15 (RX) as alternate function AF7
@@ -44,11 +44,11 @@ void UART_Config(uint32_t baud_rate);
  * @retval N/A (blocking)
  *
  * @timing
- *  - Per-byte latency: ~40-50 µs at 230400 baud
+ *  - Per-byte latency: ~22 µs at 460800 baud (10 bits/byte: 8N1)
  *
  * @data_format
- *  - UART parameters: 8-bit, 1 stop bit, no parity
- *  - Baud rate: 230400
+ *  - UART parameters: 8-bit, 1 stop bit, no parity (8N1)
+ *  - Baud rate: configured via UART_Config() — 460800 in this project
  *
  * @see UART_Config, USART2_putString
  */
@@ -63,8 +63,8 @@ void USART2_Send(uint8_t c);
  * @retval N/A (blocking)
  *
  * @timing
- *  - Per-character latency: ~40-50 µs at 230400 baud
- *  - For 10-char string: ~400-500 µs total
+ *  - Per-character latency: ~22 µs at 460800 baud (10 bits/byte: 8N1)
+ *  - For 10-char string: ~220 µs; typical CSV frame ~350 µs
  *
  * @data_format
  *  - String must be null-terminated

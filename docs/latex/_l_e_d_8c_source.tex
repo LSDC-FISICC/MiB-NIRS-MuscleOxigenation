@@ -1,0 +1,127 @@
+\doxysection{LED.\+c}
+\hypertarget{_l_e_d_8c_source}{}\label{_l_e_d_8c_source}\index{Project/LED.c@{Project/LED.c}}
+\doxymbox{\hyperlink{_l_e_d_8c}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00001}00001\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00002}00002\ \textcolor{comment}{\ *\ @file\ LED.c}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00003}00003\ \textcolor{comment}{\ *\ @brief\ GPIO-\/Based\ status\ LED\ control\ implementation\ for\ STM32F303K8}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00004}00004\ \textcolor{comment}{\ *\ @details\ Simple\ push-\/pull\ GPIO\ driver\ for\ visual\ feedback\ LED\ on\ port\ PB3.}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00005}00005\ \textcolor{comment}{\ *\ @author\ Julio\ Fajardo,\ PhD}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00006}00006\ \textcolor{comment}{\ *\ @date\ 2024-\/06-\/01}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00007}00007\ \textcolor{comment}{\ *\ @version\ 2.0}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00008}00008\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00010}00010\ \textcolor{preprocessor}{\#include\ "{}\doxymbox{\hyperlink{_l_e_d_8h}{LED.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00011}00011\ \textcolor{preprocessor}{\#include\ "{}stm32f303x8.h"{}}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00012}00012\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00013}00013\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00014}00014\ \textcolor{comment}{\ *\ @brief\ Initialize\ GPIO\ port\ B,\ pin\ 3\ as\ push-\/pull\ output}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00015}00015\ \textcolor{comment}{\ *\ @details\ Complete\ GPIO\ setup\ for\ LED\ control:}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00016}00016\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 1.\ **Enable\ GPIOB\ peripheral\ clock**\ (AHB\ domain)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00017}00017\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 2.\ **Configure\ PB3\ mode**\ as\ output\ (push-\/pull)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00018}00018\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 3.\ **Configure\ PB4\ mode**\ as\ output\ (reserved\ for\ future\ use)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00019}00019\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 4.\ **Ensure\ push-\/pull\ type**\ (OTYPER[3]=0,\ OTYPER[4]=0)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00020}00020\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 5.\ Ready\ for\ ODR\ writes\ (LED\_On,\ LED\_Off,\ LED\_Toggle)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00021}00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00022}00022\ \textcolor{comment}{\ *\ \#\#\#\ Register\ Operations}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00023}00023\ \textcolor{comment}{\ *\ \ -\/\ RCC-\/>AHBENR\ |=\ RCC\_AHBENR\_GPIOBEN}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00024}00024\ \textcolor{comment}{\ *\ \ \ \ Bit\ Enable:\ Transitions\ GPIOB\ from\ OFF\ to\ ON\ power\ state}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00025}00025\ \textcolor{comment}{\ *\ \ \ \ Effect:\ GPIO\ registers\ become\ readable/writable}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00026}00026\ \textcolor{comment}{\ *\ \ \ \ Latency:\ \string~3\ AHB\ cycles\ (\string~50\ ns\ @\ 64\ MHz)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00027}00027\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00028}00028\ \textcolor{comment}{\ *\ \ -\/\ GPIOB-\/>MODER\ \&=\ \string~((3<<6)|(3<<8))}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00029}00029\ \textcolor{comment}{\ *\ \ \ \ Clear\ bits\ [7:6]\ (PB3\ mode)\ and\ [9:8]\ (PB4\ mode)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00030}00030\ \textcolor{comment}{\ *\ \ \ \ Purpose:\ Reset\ both\ pin\ modes\ to\ input\ (00)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00031}00031\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00032}00032\ \textcolor{comment}{\ *\ \ -\/\ GPIOB-\/>MODER\ |=\ (1<<6)\ |\ (1<<8)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00033}00033\ \textcolor{comment}{\ *\ \ \ \ Set\ bits\ [6]=1\ (PB3\ mode[0]=1)\ and\ [8]=1\ (PB4\ mode[0]=1)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00034}00034\ \textcolor{comment}{\ *\ \ \ \ Result:\ MODER[7:6]\ =\ 01\ (PB3\ =\ output),\ MODER[9:8]\ =\ 01\ (PB4\ =\ output)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00035}00035\ \textcolor{comment}{\ *\ \ \ \ Note:\ PB4\ is\ configured\ as\ output\ here;\ I2C1\ uses\ PB6/PB7\ (AF4),\ not\ PB4}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00036}00036\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00037}00037\ \textcolor{comment}{\ *\ \#\#\#\ GPIO\ State\ After\ Config}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00038}00038\ \textcolor{comment}{\ *\ \ |\ Feature\ |\ PB3\ |\ PB4\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00039}00039\ \textcolor{comment}{\ *\ \ |-\/-\/-\/-\/-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/|}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00040}00040\ \textcolor{comment}{\ *\ \ |\ Mode\ |\ Output\ |\ Output\ (reserved)\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00041}00041\ \textcolor{comment}{\ *\ \ |\ Type\ |\ Push-\/pull\ |\ Push-\/pull\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00042}00042\ \textcolor{comment}{\ *\ \ |\ Speed\ |\ Medium\ |\ Medium\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00043}00043\ \textcolor{comment}{\ *\ \ |\ Initial\ ODR\ |\ 0\ (LOW)\ |\ 0\ (LOW)\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00044}00044\ \textcolor{comment}{\ *\ \ |\ Pull\ |\ None\ |\ None\ |}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00045}00045\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00046}00046\ \textcolor{comment}{\ *\ @param\ None}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00047}00047\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00048}00048\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00049}00049\ \textcolor{comment}{\ *\ @timing}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00050}00050\ \textcolor{comment}{\ *\ \ -\/\ Clock\ stabilization:\ \string~3\ AHB\ cycles}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00051}00051\ \textcolor{comment}{\ *\ \ -\/\ Register\ writes:\ \string~1\ cycle\ each\ (3\ writes\ =\ 3\ cycles)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00052}00052\ \textcolor{comment}{\ *\ \ -\/\ Total:\ <500\ ns}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00053}00053\ \textcolor{comment}{\ *\ \ -\/\ PB3\ ready\ for\ output:\ immediately\ after\ function\ returns}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00054}00054\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00055}00055\ \textcolor{comment}{\ *\ @critical\_notes}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00056}00056\ \textcolor{comment}{\ *\ \ -\/\ Must\ be\ called\ AFTER\ clk\_config()\ to\ ensure\ SYSCLK\ is\ stable\ at\ 64\ MHz}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00057}00057\ \textcolor{comment}{\ *\ \ -\/\ I2C1\_Config()\ must\ be\ called\ AFTER\ this\ function\ to\ properly\ configure\ PB4\ as\ I2C\ alternate\ function}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00058}00058\ \textcolor{comment}{\ *\ \ -\/\ Initialization\ order:\ clk\_config()\ →\ LED\_config()\ →\ I2C1\_Config()}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00059}00059\ \textcolor{comment}{\ *\ \ -\/\ Do\ not\ call\ LED\_config()\ after\ I2C1\_Config()\ as\ it\ overwrites\ PB4\ alternate\ function\ configuration}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00060}00060\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00061}00061\ \textcolor{comment}{\ *\ @side\_effects}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00062}00062\ \textcolor{comment}{\ *\ \ -\/\ GPIOB\ clock\ permanently\ enabled\ (not\ disabled\ in\ low-\/power\ mode\ by\ default)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00063}00063\ \textcolor{comment}{\ *\ \ -\/\ PB3\ is\ now\ an\ output;\ cannot\ be\ used\ as\ input,\ ADC,\ or\ timer\ capture}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00064}00064\ \textcolor{comment}{\ *\ \ -\/\ PB3\ starts\ LOW\ (LED\ off);\ no\ explicit\ LED\_Off()\ call\ needed}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00065}00065\ \textcolor{comment}{\ *\ \ -\/\ Draws\ \string~1\ mA\ additional\ idle\ current\ (GPIOB\ always\ powered)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00066}00066\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00067}00067\ \textcolor{comment}{\ *\ @power\_note}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00068}00068\ \textcolor{comment}{\ *\ \ -\/\ GPIOB\ active\ power:\ \string~1\ mA\ @\ 3.3V\ (all\ 16\ pins)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00069}00069\ \textcolor{comment}{\ *\ \ -\/\ PB3\ push-\/pull\ output\ (idle):\ <1\ µA\ when\ HIGH,\ <1\ µA\ when\ LOW}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00070}00070\ \textcolor{comment}{\ *\ \ -\/\ LED\ current:\ 10-\/20\ mA\ typical\ (dominates\ GPIO\ current\ by\ \string~100×)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00071}00071\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00072}00072\ \textcolor{comment}{\ *\ @see\ LED\_On,\ LED\_Off,\ LED\_Toggle}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00073}00073\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00074}\doxymbox{\hyperlink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{00074}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{LED\_config}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00075}00075\ \ \ \ \ RCC-\/>AHBENR\ |=\ RCC\_AHBENR\_GPIOBEN;}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00076}00076\ \ \ \ \ GPIOB-\/>MODER\ \&=\ \string~((3<<6)|(3<<8));}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00077}00077\ \ \ \ \ GPIOB-\/>MODER\ |=\ (1<<6)\ |\ (1<<8);}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00078}00078\ \}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00079}00079\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00080}00080\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00081}00081\ \textcolor{comment}{\ *\ @brief\ Drive\ PB3\ output\ HIGH\ (turn\ LED\ on)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00082}00082\ \textcolor{comment}{\ *\ @details\ Sets\ GPIO\ output\ data\ register\ bit\ 3\ to\ logical\ HIGH\ (3.3\ V).}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00083}00083\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ Push-\/pull\ driver\ sources\ current\ for\ LED\ to\ illuminate.}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00084}00084\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00085}00085\ \textcolor{comment}{\ *\ @param\ None}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00086}00086\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00087}00087\ \textcolor{comment}{\ *\ @timing\ \string~30\ ns\ latency}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00088}00088\ \textcolor{comment}{\ *\ @see\ LED\_Off,\ LED\_Toggle,\ LED\_config}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00089}00089\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00090}\doxymbox{\hyperlink{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{00090}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{LED\_On}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00091}00091\ \ \ \ \ GPIOB-\/>ODR\ |=\ (1<<3);}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00092}00092\ \}\ \ \ }
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00093}00093\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00094}00094\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00095}00095\ \textcolor{comment}{\ *\ @brief\ Drive\ PB3\ output\ LOW\ (turn\ LED\ off)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00096}00096\ \textcolor{comment}{\ *\ @details\ Clears\ GPIO\ output\ data\ register\ bit\ 3\ to\ logical\ LOW\ (0\ V).}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00097}00097\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ LED\ current\ stops\ and\ LED\ extinguishes.}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00098}00098\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00099}00099\ \textcolor{comment}{\ *\ @param\ None}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00100}00100\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00101}00101\ \textcolor{comment}{\ *\ @timing\ \string~30\ ns\ latency}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00102}00102\ \textcolor{comment}{\ *\ @see\ LED\_On,\ LED\_Toggle,\ LED\_config}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00103}00103\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00104}\doxymbox{\hyperlink{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}{00104}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}{LED\_Off}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00105}00105\ \ \ \ \ GPIOB-\/>ODR\ \&=\ \string~(1<<3);}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00106}00106\ \}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00107}00107\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00108}00108\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00109}00109\ \textcolor{comment}{\ *\ @brief\ Toggle\ PB3\ output\ state\ (if\ HIGH\ →\ LOW;\ else\ LOW\ →\ HIGH)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00110}00110\ \textcolor{comment}{\ *\ @details\ Inverts\ LED\ state\ via\ XOR\ operation\ on\ GPIO\ output\ data\ register.}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00111}00111\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ Ideal\ for\ periodic\ blinking\ feedback\ in\ SysTick\ ISR.}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00112}00112\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00113}00113\ \textcolor{comment}{\ *\ @param\ None}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00114}00114\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00115}00115\ \textcolor{comment}{\ *\ @timing\ \string~30-\/50\ ns\ latency}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00116}00116\ \textcolor{comment}{\ *\ @note\ Called\ from\ SysTick\_Handler()\ every\ 20\ ms\ →\ 25\ Hz\ blink\ (20\ ms\ on,\ 20\ ms\ off)}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00117}00117\ \textcolor{comment}{\ *\ @see\ LED\_On,\ LED\_Off,\ LED\_config}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00118}00118\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00119}\doxymbox{\hyperlink{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557}{00119}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557}{LED\_Toggle}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00120}00120\ \ \ \ \ GPIOB-\/>ODR\ \string^=\ (1<<3);}
+\DoxyCodeLine{\Hypertarget{_l_e_d_8c_source_l00121}00121\ \}}
+
+\end{DoxyCode}

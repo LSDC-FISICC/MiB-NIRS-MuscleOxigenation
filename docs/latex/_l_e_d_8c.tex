@@ -1,0 +1,233 @@
+\doxysection{Project/\+\+LED.c File Reference}
+\hypertarget{_l_e_d_8c}{}\label{_l_e_d_8c}\index{Project/LED.c@{Project/LED.c}}
+
+
+GPIO-\/\+Based status LED control implementation for STM32\+F303\+K8.  
+
+
+{\ttfamily \+\#include "{}LED.\+h"{}}\newline
+{\ttfamily \+\#include "{}stm32f303x8.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config}} (void)
+\begin{DoxyCompactList}\small\item\em Initialize GPIO port B, pin 3 as push-\/pull output. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{LED\+\_\+\+On}} (void)
+\begin{DoxyCompactList}\small\item\em Drive PB3 output HIGH (turn LED on). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}{LED\+\_\+\+Off}} (void)
+\begin{DoxyCompactList}\small\item\em Drive PB3 output LOW (turn LED off). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557}{LED\+\_\+\+Toggle}} (void)
+\begin{DoxyCompactList}\small\item\em Toggle PB3 output state (if HIGH → LOW; else LOW → HIGH). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+GPIO-\/\+Based status LED control implementation for STM32\+F303\+K8. 
+
+Simple push-\/pull GPIO driver for visual feedback LED on port PB3. \begin{DoxyAuthor}{Author}
+Julio Fajardo, PhD 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/06-\/01 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+2.\+0 
+\end{DoxyVersion}
+
+
+Definition in file \doxymbox{\hyperlink{_l_e_d_8c_source}{LED.\+c}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{_l_e_d_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}\index{LED.c@{LED.c}!LED\_config@{LED\_config}}
+\index{LED\_config@{LED\_config}!LED.c@{LED.c}}
+\doxysubsubsection{\texorpdfstring{LED\_config()}{LED\_config()}}
+{\footnotesize\ttfamily \label{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731} 
+void LED\+\_\+config (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Initialize GPIO port B, pin 3 as push-\/pull output. 
+
+Complete GPIO setup for LED control:\+
+\begin{DoxyEnumerate}
+\item {\bfseries{Enable GPIOB peripheral clock}} (AHB domain)
+\item {\bfseries{Configure PB3 mode}} as output (push-\/pull)
+\item {\bfseries{Configure PB4 mode}} as output (reserved for future use)
+\item {\bfseries{Ensure push-\/pull type}} (OTYPER\+[3]\+=0, OTYPER\+[4]\+=0)
+\item Ready for ODR writes (LED\+\_\+\+On, LED\+\_\+\+Off, LED\+\_\+\+Toggle)
+\end{DoxyEnumerate}\hypertarget{_l_e_d_8h_autotoc_md8}{}\doxysubsubsubsection{\texorpdfstring{Register Operations}{Register Operations}}\label{_l_e_d_8h_autotoc_md8}
+
+\begin{DoxyItemize}
+\item RCC-\/\texorpdfstring{$>$}{>}AHBENR \texorpdfstring{$\vert$}{|}= RCC\+\_\+\+AHBENR\+\_\+\+GPIOBEN Bit Enable:\+ Transitions GPIOB from OFF to ON power state Effect:\+ GPIO registers become readable/\+writable Latency:\+ \texorpdfstring{$\sim$}{\string~}3 AHB cycles (\texorpdfstring{$\sim$}{\string~}50 ns @ 64 MHz)
+\item GPIOB-\/\texorpdfstring{$>$}{>}MODER \&= \texorpdfstring{$\sim$}{\string~}((3\texorpdfstring{$<$}{<}\texorpdfstring{$<$}{<}6)\texorpdfstring{$\vert$}{|}(3\texorpdfstring{$<$}{<}\texorpdfstring{$<$}{<}8)) Clear bits \+[7:\+6]\+ (PB3 mode) and \+[9:\+8]\+ (PB4 mode) Purpose:\+ Reset both pin modes to input (00)
+\item GPIOB-\/\texorpdfstring{$>$}{>}MODER \texorpdfstring{$\vert$}{|}= (1\texorpdfstring{$<$}{<}\texorpdfstring{$<$}{<}6) \texorpdfstring{$\vert$}{|} (1\texorpdfstring{$<$}{<}\texorpdfstring{$<$}{<}8) Set bits \+[6]\+=1 (PB3 mode\+[0]\+=1) and \+[8]\+=1 (PB4 mode\+[0]\+=1) Result:\+ MODER\+[7:\+6]\+ = 01 (PB3 = output), MODER\+[9:\+8]\+ = 01 (PB4 = output) Note:\+ PB4 is configured as output here; I2\+C1 uses PB6/\+\+PB7 (AF4), not PB4
+\end{DoxyItemize}\hypertarget{_l_e_d_8h_autotoc_md9}{}\doxysubsubsubsection{\texorpdfstring{GPIO State After Config}{GPIO State After Config}}\label{_l_e_d_8h_autotoc_md9}
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Feature  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}PB3  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}PB4  \\
+Mode  &Output  &Output (reserved)  \\
+Type  &Push-\/pull  &Push-\/pull  \\
+Speed  &Medium  &Medium  \\
+Initial ODR  &0 (LOW)  &0 (LOW)  \\
+Pull  &None  &None  \\
+\end{DoxyTable}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Clock stabilization:\+ \texorpdfstring{$\sim$}{\string~}3 AHB cycles
+\item Register writes:\+ \texorpdfstring{$\sim$}{\string~}1 cycle each (3 writes = 3 cycles)
+\item Total:\+ \texorpdfstring{$<$}{<}500 ns
+\item PB3 ready for output:\+ immediately after function returns
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Critical Notes:\+}
+
+\begin{DoxyItemize}
+\item Must be called AFTER \doxylink{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}{clk\+\_\+config()} to ensure SYSCLK is stable at 64 MHz
+\item \doxylink{_i2_c_8c_aeb07abc3e8d8d8ad6b7e69cb4992dec8}{I2\+C1\+\_\+\+Config()} must be called AFTER this function to properly configure PB4 as I2C alternate function
+\item Initialization order:\+ \doxylink{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}{clk\+\_\+config()} → \doxylink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config()} → \doxylink{_i2_c_8c_aeb07abc3e8d8d8ad6b7e69cb4992dec8}{I2\+C1\+\_\+\+Config()}
+\item Do not call \doxylink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config()} after \doxylink{_i2_c_8c_aeb07abc3e8d8d8ad6b7e69cb4992dec8}{I2\+C1\+\_\+\+Config()} as it overwrites PB4 alternate function configuration
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Side Effects:\+}
+
+\begin{DoxyItemize}
+\item GPIOB clock permanently enabled (not disabled in low-\/power mode by default)
+\item PB3 is now an output; cannot be used as input, ADC, or timer capture
+\item PB3 starts LOW (LED off); no explicit \doxylink{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}{LED\+\_\+\+Off()} call needed
+\item Draws \texorpdfstring{$\sim$}{\string~}1 mA additional idle current (GPIOB always powered)
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Power Note:\+}
+
+\begin{DoxyItemize}
+\item GPIOB active power:\+ \texorpdfstring{$\sim$}{\string~}1 mA @ 3.\+3V (all 16 pins)
+\item PB3 push-\/pull output (idle):\+ \texorpdfstring{$<$}{<}1 µA when HIGH, \texorpdfstring{$<$}{<}1 µA when LOW
+\item LED current:\+ 10-\/20 mA typical (dominates GPIO current by \texorpdfstring{$\sim$}{\string~}100×)
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{LED\+\_\+\+On}, \doxylink{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}{LED\+\_\+\+Off}, \doxylink{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557}{LED\+\_\+\+Toggle} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_l_e_d_8c_source_l00074}{74}} of file \doxymbox{\hyperlink{_l_e_d_8c_source}{LED.\+c}}.
+
+\Hypertarget{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65}\index{LED.c@{LED.c}!LED\_Off@{LED\_Off}}
+\index{LED\_Off@{LED\_Off}!LED.c@{LED.c}}
+\doxysubsubsection{\texorpdfstring{LED\_Off()}{LED\_Off()}}
+{\footnotesize\ttfamily \label{_l_e_d_8c_af842f9996045107cd0841a4f0707fc65} 
+void LED\+\_\+\+Off (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Drive PB3 output LOW (turn LED off). 
+
+Drive LED output LOW (turn off).
+
+Clears GPIO output data register bit 3 to logical LOW (0 V). LED current stops and LED extinguishes.
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+ \texorpdfstring{$\sim$}{\string~}30 ns latency}
+
+\end{DoxyParagraph}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_l_e_d_8h_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{LED\+\_\+\+On}, \doxylink{_l_e_d_8h_a3b0db98f4b9d8da4c54223aa39ebc557}{LED\+\_\+\+Toggle}, \doxylink{_l_e_d_8h_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config} 
+\end{DoxySeeAlso}
+
+
+Definition at line \doxymbox{\hyperlink{_l_e_d_8c_source_l00104}{104}} of file \doxymbox{\hyperlink{_l_e_d_8c_source}{LED.\+c}}.
+
+\Hypertarget{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d}\index{LED.c@{LED.c}!LED\_On@{LED\_On}}
+\index{LED\_On@{LED\_On}!LED.c@{LED.c}}
+\doxysubsubsection{\texorpdfstring{LED\_On()}{LED\_On()}}
+{\footnotesize\ttfamily \label{_l_e_d_8c_a94ffebcdd3b5bbbf9a89e9f9ab52028d} 
+void LED\+\_\+\+On (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Drive PB3 output HIGH (turn LED on). 
+
+Drive LED output HIGH (turn on).
+
+Sets GPIO output data register bit 3 to logical HIGH (3.\+3 V). Push-\/pull driver sources current for LED to illuminate.
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+ \texorpdfstring{$\sim$}{\string~}30 ns latency}
+
+\end{DoxyParagraph}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_l_e_d_8h_af842f9996045107cd0841a4f0707fc65}{LED\+\_\+\+Off}, \doxylink{_l_e_d_8h_a3b0db98f4b9d8da4c54223aa39ebc557}{LED\+\_\+\+Toggle}, \doxylink{_l_e_d_8h_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config} 
+\end{DoxySeeAlso}
+
+
+Definition at line \doxymbox{\hyperlink{_l_e_d_8c_source_l00090}{90}} of file \doxymbox{\hyperlink{_l_e_d_8c_source}{LED.\+c}}.
+
+\Hypertarget{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557}\index{LED.c@{LED.c}!LED\_Toggle@{LED\_Toggle}}
+\index{LED\_Toggle@{LED\_Toggle}!LED.c@{LED.c}}
+\doxysubsubsection{\texorpdfstring{LED\_Toggle()}{LED\_Toggle()}}
+{\footnotesize\ttfamily \label{_l_e_d_8c_a3b0db98f4b9d8da4c54223aa39ebc557} 
+void LED\+\_\+\+Toggle (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Toggle PB3 output state (if HIGH → LOW; else LOW → HIGH). 
+
+Invert LED output state (high ↔ low).
+
+Inverts LED state via XOR operation on GPIO output data register. Ideal for periodic blinking feedback in Sys\+Tick ISR.
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+ \texorpdfstring{$\sim$}{\string~}30-\/50 ns latency}
+
+\end{DoxyParagraph}
+\begin{DoxyNote}{Note}
+Called from Sys\+Tick\+\_\+\+Handler() every 20 ms → 25 Hz blink (20 ms on, 20 ms off) 
+\end{DoxyNote}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_l_e_d_8h_a94ffebcdd3b5bbbf9a89e9f9ab52028d}{LED\+\_\+\+On}, \doxylink{_l_e_d_8h_af842f9996045107cd0841a4f0707fc65}{LED\+\_\+\+Off}, \doxylink{_l_e_d_8h_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_l_e_d_8c_source_l00119}{119}} of file \doxymbox{\hyperlink{_l_e_d_8c_source}{LED.\+c}}.
+

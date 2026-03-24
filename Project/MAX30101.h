@@ -4,7 +4,7 @@
  * @details Complete driver for Maxim Integrated MAX30101 optical sensor supporting:
  *          - Multi-LED mode (Red, IR, Green) for NIRS measurements
  *          - Dual-LED mode (Red, IR) for SpO2 measurements
- *          - Direct current readout in nanoamps (nA) with 7.81 pA resolution
+ *          - Direct current readout in nanoamps (nA) with 31.25 pA resolution (16-bit ADC)
  *          - 16-bit ADC with 2048 nA full-scale range
  *          - 32-sample FIFO with wrap-around support
  * @author Julio Fajardo, PhD
@@ -16,7 +16,6 @@
 #define MAX30101_H_
 
 #include <stdint.h>
-#include "arm_math.h"
 #include "arm_math_types.h"
 
 #define		SENSOR_ADDR 		0xAE
@@ -84,9 +83,9 @@ typedef struct {
 /**
  * @struct MAX30101_SampleCurrent
  * @brief Calibrated photodiode current in nanoamps (nA)
- * @details Final processed format: ADC values scaled to current using 7.81 pA LSB.
+ * @details Final processed format: ADC values scaled to current using 31.25 pA LSB.
  *          Range: 0 to 2048 nA (full-scale current)
- *          Resolution: 0.00781 nA per LSB
+ *          Resolution: 0.03125 nA per LSB (16-bit ADC, 2048 nA full-scale)
  * @note Use MAX30101_ReadFIFO_Current() or MAX30101_ConvertUint16ToCurrent() to generate
  * @see MAX30101_ReadFIFO_Current, MAX30101_ConvertUint16ToCurrent
  */

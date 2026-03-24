@@ -1,0 +1,105 @@
+\doxysection{UART.\+c}
+\hypertarget{_u_a_r_t_8c_source}{}\label{_u_a_r_t_8c_source}\index{Project/UART.c@{Project/UART.c}}
+\doxymbox{\hyperlink{_u_a_r_t_8c}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00001}00001\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00002}00002\ \textcolor{comment}{\ *\ @file\ UART.c}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00003}00003\ \textcolor{comment}{\ *\ @brief\ USART2\ driver\ implementation\ for\ MAX30101\ data\ transmission}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00004}00004\ \textcolor{comment}{\ *\ @details\ Configures\ USART2\ (PA2=TX,\ PA15=RX)\ at\ variable\ baud\ rate}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00005}00005\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ with\ blocking\ transmission\ support.}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00006}00006\ \textcolor{comment}{\ *\ @author\ Julio\ Fajardo,\ PhD}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00007}00007\ \textcolor{comment}{\ *\ @date\ 2024-\/06-\/01}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00008}00008\ \textcolor{comment}{\ *\ @version\ 2.0}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00009}00009\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00011}00011\ \textcolor{preprocessor}{\#include\ "{}\doxymbox{\hyperlink{_u_a_r_t_8h}{UART.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00012}00012\ \textcolor{preprocessor}{\#include\ "{}stm32f303x8.h"{}}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00013}00013\ \textcolor{preprocessor}{\#include\ "{}system\_stm32f3xx.h"{}}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00015}00015\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00016}00016\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00017}00017\ \textcolor{comment}{\ *\ @brief\ Initialize\ USART2\ for\ configurable\ baud\ rate\ transmission}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00018}00018\ \textcolor{comment}{\ *\ @details\ Complete\ USART2\ setup\ sequence:}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00019}00019\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 1.\ Enable\ GPIOA\ and\ USART2\ clocks}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00020}00020\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 2.\ Configure\ PA2\ (TX)\ and\ PA15\ (RX)\ as\ AF7\ (Alternate\ Function\ 7)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00021}00021\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 3.\ Configure\ BRR\ for\ desired\ baud\ rate}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00022}00022\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ 4.\ Enable\ transmitter,\ receiver,\ and\ receiver\ interrupt}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00023}00023\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00024}00024\ \textcolor{comment}{\ *\ @param\ baud\_rate\ -\/\ Desired\ baud\ rate\ (e.g.,\ 460800\ as\ used\ in\ this\ project)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00025}00025\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00026}00026\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00027}00027\ \textcolor{comment}{\ *\ @timing}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00028}00028\ \textcolor{comment}{\ *\ \ -\/\ Total\ init\ time:\ <1\ ms}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00029}00029\ \textcolor{comment}{\ *\ \ -\/\ USART2\ ready\ immediately\ after\ function\ returns}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00030}00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00031}00031\ \textcolor{comment}{\ *\ @warning\ Call\ once\ at\ system\ startup,\ BEFORE\ any\ USART2\_Send\ operations}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00032}00032\ \textcolor{comment}{\ *\ @see\ USART2\_Send,\ USART2\_putString}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00033}00033\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00034}\doxymbox{\hyperlink{_u_a_r_t_8c_a77f7f2f6837c7bf4223c7cdc0470585b}{00034}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_u_a_r_t_8c_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\_Config}}(uint32\_t\ baud\_rate)\ \{}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00035}00035\ \ \ \ \ \textcolor{comment}{//\ Enable\ GPIOA\ clock\ (for\ PA2\ and\ PA15)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00036}00036\ \ \ \ \ RCC-\/>AHBENR\ |=\ RCC\_AHBENR\_GPIOAEN;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00037}00037\ \ \ \ \ \textcolor{comment}{//\ Enable\ USART2\ clock\ (APB1)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00038}00038\ \ \ \ \ RCC-\/>APB1ENR\ |=\ RCC\_APB1ENR\_USART2EN;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00039}00039\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00040}00040\ \ \ \ \ \textcolor{comment}{//\ Configure\ PA2\ and\ PA15\ as\ alternate\ function\ pins}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00041}00041\ \ \ \ \ GPIOA-\/>MODER\ |=\ (0x02\ <<\ 4)\ |\ (0x2\ <<\ 30);}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00042}00042\ \ \ \ \ \textcolor{comment}{//\ Set\ PA2\ alternate\ function\ to\ AF7\ (USART2\_TX)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00043}00043\ \ \ \ \ GPIOA-\/>AFR[0]\ |=\ (0x07\ <<\ 8);}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00044}00044\ \ \ \ \ \textcolor{comment}{//\ Set\ PA15\ alternate\ function\ to\ AF7\ (USART2\_RX)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00045}00045\ \ \ \ \ GPIOA-\/>AFR[1]\ |=\ (0x07\ <<\ 28);}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00046}00046\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00047}00047\ \ \ \ \ \textcolor{comment}{//\ Configure\ baud\ rate:\ BRR\ =\ (APB1\_Clock\ /\ baud\_rate)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00048}00048\ \ \ \ \ \textcolor{comment}{//\ APB1\ =\ 32\ MHz\ (SYSCLK/2),\ so\ BRR\ =\ 32MHz\ /\ baud\_rate}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00049}00049\ \ \ \ \ USART2-\/>BRR\ =\ (uint32\_t)((SystemCoreClock\ /\ 2)\ /\ baud\_rate);}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00050}00050\ \ \ \ \ \textcolor{comment}{//\ Enable\ transmitter\ and\ receiver}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00051}00051\ \ \ \ \ USART2-\/>CR1\ |=\ USART\_CR1\_RE\ |\ USART\_CR1\_TE;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00052}00052\ \ \ \ \ \textcolor{comment}{//\ Enable\ USART2}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00053}00053\ \ \ \ \ USART2-\/>CR1\ |=\ USART\_CR1\_UE;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00054}00054\ \ \ \ \ \textcolor{comment}{//\ Enable\ receiver\ interrupt\ for\ future\ use}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00055}00055\ \ \ \ \ USART2-\/>CR1\ |=\ USART\_CR1\_RXNEIE;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00056}00056\ \}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00057}00057\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00058}00058\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00059}00059\ \textcolor{comment}{\ *\ @brief\ Send\ single\ character\ via\ USART2}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00060}00060\ \textcolor{comment}{\ *\ @details\ Blocks\ until\ previous\ transmission\ complete,\ then\ sends\ one\ byte}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00061}00061\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00062}00062\ \textcolor{comment}{\ *\ @param\ c\ -\/\ Character\ byte\ to\ transmit}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00063}00063\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00064}00064\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00065}00065\ \textcolor{comment}{\ *\ @timing}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00066}00066\ \textcolor{comment}{\ *\ \ -\/\ Per-\/byte\ latency:\ \string~22\ µs\ at\ 460800\ baud\ (10\ bits/byte:\ 8N1)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00067}00067\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00068}00068\ \textcolor{comment}{\ *\ @note\ Blocking\ function;\ waits\ for\ TC\ (transmission\ complete)\ flag}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00069}00069\ \textcolor{comment}{\ *\ @see\ UART\_Config,\ USART2\_putString}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00070}00070\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00071}\doxymbox{\hyperlink{_u_a_r_t_8c_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{00071}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_u_a_r_t_8c_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\_Send}}(uint8\_t\ c)\ \{}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00072}00072\ \ \ \ \ \textcolor{comment}{//\ Wait\ for\ previous\ transmission\ to\ complete\ (TC\ flag)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00073}00073\ \ \ \ \ \textcolor{keywordflow}{while}\ (!(USART2-\/>ISR\ \&\ USART\_ISR\_TC));}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00074}00074\ \ \ \ \ \textcolor{comment}{//\ Load\ character\ into\ transmit\ data\ register}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00075}00075\ \ \ \ \ USART2-\/>TDR\ =\ c;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00076}00076\ \}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00077}00077\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00078}00078\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00079}00079\ \textcolor{comment}{\ *\ @brief\ Send\ null-\/terminated\ string\ via\ USART2}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00080}00080\ \textcolor{comment}{\ *\ @details\ Transmits\ string\ character-\/by-\/character\ using\ USART2\_Send()}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00081}00081\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00082}00082\ \textcolor{comment}{\ *\ @param\ string\ -\/\ Pointer\ to\ null-\/terminated\ character\ string}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00083}00083\ \textcolor{comment}{\ *\ @return\ void}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00084}00084\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00085}00085\ \textcolor{comment}{\ *\ @timing}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00086}00086\ \textcolor{comment}{\ *\ \ -\/\ Per-\/character\ latency:\ \string~22\ µs\ at\ 460800\ baud\ (10\ bits/byte:\ 8N1)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00087}00087\ \textcolor{comment}{\ *\ \ -\/\ Example:\ 10-\/character\ string\ ≈\ 220\ µs\ total;\ typical\ CSV\ frame\ \string~350\ µs}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00088}00088\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00089}00089\ \textcolor{comment}{\ *\ @data\_format\ String\ must\ be\ null-\/terminated\ (\(\backslash\)\(\backslash\)0)}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00090}00090\ \textcolor{comment}{\ *\ @note\ Blocking\ function;\ waits\ for\ each\ character's\ transmission}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00091}00091\ \textcolor{comment}{\ *\ @see\ UART\_Config,\ USART2\_Send}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00092}00092\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00093}\doxymbox{\hyperlink{_u_a_r_t_8c_a7a083248cb8b42dbc3049f35c92a2dfa}{00093}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{_u_a_r_t_8c_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\_putString}}(\textcolor{keywordtype}{char}\ *\textcolor{keywordtype}{string})\ \{}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00094}00094\ \ \ \ \ \textcolor{comment}{//\ Transmit\ each\ character\ until\ null\ terminator}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00095}00095\ \ \ \ \ \textcolor{keywordflow}{while}\ (*\textcolor{keywordtype}{string})\ \{}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00096}00096\ \ \ \ \ \ \ \ \ \doxymbox{\hyperlink{_u_a_r_t_8c_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\_Send}}(*\textcolor{keywordtype}{string});}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}++;}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00098}00098\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_u_a_r_t_8c_source_l00099}00099\ \}}
+
+\end{DoxyCode}

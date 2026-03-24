@@ -5,7 +5,7 @@
  *          with blocking transmission support.
  * @author Julio Fajardo, PhD
  * @date 2024-06-01
- * @version 1.0
+ * @version 2.0
  */
 
 #include "UART.h"
@@ -21,7 +21,7 @@
  *          3. Configure BRR for desired baud rate
  *          4. Enable transmitter, receiver, and receiver interrupt
  *
- * @param baud_rate - Desired baud rate (e.g., 230400)
+ * @param baud_rate - Desired baud rate (e.g., 460800 as used in this project)
  * @return void
  *
  * @timing
@@ -63,7 +63,7 @@ void UART_Config(uint32_t baud_rate) {
  * @return void
  *
  * @timing
- *  - Per-byte latency: ~40-50 µs at 230400 baud
+ *  - Per-byte latency: ~22 µs at 460800 baud (10 bits/byte: 8N1)
  *
  * @note Blocking function; waits for TC (transmission complete) flag
  * @see UART_Config, USART2_putString
@@ -83,8 +83,8 @@ void USART2_Send(uint8_t c) {
  * @return void
  *
  * @timing
- *  - Per-character latency: ~40-50 µs at 230400 baud
- *  - Example: 10-character string ≈ 400-500 µs total
+ *  - Per-character latency: ~22 µs at 460800 baud (10 bits/byte: 8N1)
+ *  - Example: 10-character string ≈ 220 µs total; typical CSV frame ~350 µs
  *
  * @data_format String must be null-terminated (\\0)
  * @note Blocking function; waits for each character's transmission

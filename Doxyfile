@@ -74,7 +74,7 @@ PROJECT_ICON           =
 # entered, it will be relative to the location where Doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       =
+OUTPUT_DIRECTORY       = docs
 
 # If the CREATE_SUBDIRS tag is set to YES then Doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -290,7 +290,19 @@ TAB_SIZE               = 4
 # with the commands \{ and \} for these it is advised to use the version @{ and
 # @} or use a double escape (\\{ and \\})
 
-ALIASES                =
+ALIASES                = timing="\par Timing:" \
+                         data_output="\par Data Output:" \
+                         register_ops="\par Register Operations:" \
+                         critical_notes="\par Critical Notes:" \
+                         side_effects="\par Side Effects:" \
+                         power_note="\par Power Note:" \
+                         flags_monitored="\par Flags Monitored:" \
+                         error_conditions="\par Error Conditions:" \
+                         performance_note="\par Performance Note:" \
+                         critical_sequence="\par Critical Sequence:" \
+                         execution="\par Execution:" \
+                         data_format="\par Data Format:" \
+                         usage_example="\par Usage Example:"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For
@@ -1067,6 +1079,7 @@ INPUT_FILE_ENCODING    =
 # *.f18, *.f, *.for, *.vhd, *.vhdl, *.ucf, *.qsf and *.ice.
 
 FILE_PATTERNS          = *.c \
+                         *.h \
                          *.cc \
                          *.cxx \
                          *.cxxm \

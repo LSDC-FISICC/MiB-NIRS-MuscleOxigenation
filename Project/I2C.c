@@ -20,7 +20,7 @@
  *          5. Enable I2C1
  *
  * ### GPIO Configuration (PB6 = SCL, PB7 = SDA)
- *  - MODER: [14:12]=10 (Alternate Function for PB6), [16:14]=10 (Alternate Function for PB7)
+ *  - MODER: [13:12]=10 (Alternate Function for PB6), [15:14]=10 (Alternate Function for PB7)
  *  - OTYPER: [7]=1 (Open-drain for PB7), [6]=1 (Open-drain for PB6)
  *  - AFR[0]: [31:28]=0100 (AF4 for PB7), [27:24]=0100 (AF4 for PB6)
  *
@@ -190,7 +190,7 @@ void I2C1_Write(uint8_t slave, uint8_t addr, uint8_t data){
  *  - Read phase (per byte): ~10-15 µs
  *  - **Total latency**: 100+ 30×size µs (typical)
  *  - Example: Read 6 bytes ≈ 180-200 µs
- *  - Dominates any sensor timing; I2C is bottleneck at 100 Hz sampling
+ *  - Dominates any sensor timing; I2C is bottleneck at 50 Hz sampling
  *
  * @flags_monitored
  *  - BUSY: Wait until clear before write phase
@@ -206,9 +206,9 @@ void I2C1_Write(uint8_t slave, uint8_t addr, uint8_t data){
  *  - **Timeout on RXNE**: Slave not responding; function blocks forever
  *
  * @performance_note
- *  - Read 32 FIFO samples (192 bytes): ~6 milliseconds
- *  - Pure I2C time at 100 Hz ÷ 32 samples = dominant ISR latency
- *  - Consider DMA or firmware optimization for high-speed sampling
+ *  - Current usage: 1 sample (6 bytes) per ISR tick ≈ 180-200 µs per 20 ms window
+ *  - Budget: ~10% of ISR period consumed by I2C read (well within margin)
+ *  - Consider DMA for burst FIFO reads if sample rate or sample count increases
  *
  * @usage_example
  *  ```

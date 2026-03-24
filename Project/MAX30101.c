@@ -14,21 +14,23 @@
 #include <stdint.h>
 
 /**
- * @brief Initialize MAX30101 in SpO2 mode (dual-LED configuration)
+ * @brief Initialize MAX30101 in SpO2 mode (dual-LED: Red + IR)
  * @details Configures sensor for blood oxygen (SpO2) measurement with low power consumption.
  *          - Mode: SpO2 (Red + IR LEDs)
- *          - Sample Rate: 50 Hz (via SPO2_CONFIG = 0x01)
- *          - ADC Resolution: 16-bit
+ *          - Sample Rate: 50 Hz (SPO2_CONFIG = 0x01, bits [4:2] = 000)
+ *          - ADC Resolution: 16-bit, 118 µs pulse width (SPO2_CONFIG bits [1:0] = 01)
+ *          - ADC Range: 2048 nA full-scale (SPO2_CONFIG bits [6:5] = 00)
  *          - FIFO Configuration: No averaging, rollover enabled
- * @param ledPower - LED current control register value (0x00 to 0xFF)
- *                  Range: 0.0 mA to 51.0 mA in ~0.2 mA steps
- *                  Typical: 0x4B (~15 mA), 0x32 (~10 mA) for low power
+ * @param ledPower_red - Red LED drive current in milliamps (0.0 to 51.0 mA, ~0.2 mA steps)
+ *                       Converted to register value as: reg = (uint8_t)(mA / 0.2)
+ *                       Example: 1.6 mA → reg 0x08; 10 mA → reg 0x32
+ * @param ledPower_ir  - IR LED drive current in milliamps (same range and conversion)
  * @return void
  * @note Suitable for battery-powered wearable applications.
- *       Call this once during initialization before reading samples.
+ *       Call once during initialization before reading samples.
  * @see MAX30101_InitMuscleOx
  * @example
- *   MAX30101_InitSPO2Lite(0x18);
+ *   MAX30101_InitSPO2Lite(1.6f, 1.6f);  // 1.6 mA per LED, low power
  *   uint8_t samples = MAX30101_GetNumAvailableSamples();
  */
 void MAX30101_InitSPO2Lite(float32_t ledPower_red, float32_t ledPower_ir) {
@@ -49,24 +51,26 @@ void MAX30101_InitSPO2Lite(float32_t ledPower_red, float32_t ledPower_ir) {
 }
 
 /**
- * @brief Initialize MAX30101 for NIRS muscle oxygenation measurement
+ * @brief Initialize MAX30101 for NIRS muscle oxygenation measurement (multi-LED: Red + IR + Green)
  * @details Configures sensor for Near-Infrared Spectroscopy with 3 simultaneous LEDs.
  *          Optimal for non-invasive tissue oxygenation and perfusion monitoring.
  *          - Mode: Multi-LED (Red + IR + Green)
- *          - Sample Rate: 50 Hz (via SPO2_CONFIG = 0x01)
- *          - ADC Resolution: 16-bit
+ *          - Sample Rate: 50 Hz (SPO2_CONFIG = 0x01, bits [4:2] = 000)
+ *          - ADC Resolution: 16-bit, 118 µs pulse width (SPO2_CONFIG bits [1:0] = 01)
+ *          - ADC Range: 2048 nA full-scale (SPO2_CONFIG bits [6:5] = 00)
  *          - FIFO Configuration: No averaging, rollover enabled
- * @param ledPower - LED current control register value (0x00 to 0xFF)
- *                  Range: 0.0 mA to 51.0 mA in ~0.2 mA steps
- *                  Typical: 0x4B (~15 mA), 0x32 (~10 mA) for low power
+ * @param ledPower_red   - Red LED drive current in milliamps (0.0 to 51.0 mA, ~0.2 mA steps)
+ * @param ledPower_ir    - IR LED drive current in milliamps (same range)
+ * @param ledPower_green - Green LED drive current in milliamps (same range)
+ *                         Converted to register value as: reg = (uint8_t)(mA / 0.2)
  * @return void
  * @note Three-LED configuration increases tissue penetration depth for muscle assessment.
- *       Same 50 Hz sample rate as SPO2Lite but with additional Green LED for enhanced NIRS analysis.
+ *       Same 50 Hz sample rate as SPO2Lite but with additional Green LED for NIRS analysis.
  * @see MAX30101_InitSPO2Lite
  * @example
- *   MAX30101_InitMuscleOx(0x4B);  // 20 mA LED power
+ *   MAX30101_InitMuscleOx(10.0f, 10.0f, 10.0f);  // 10 mA per LED
  *   uint8_t available = MAX30101_GetNumAvailableSamples();
- *   MAX30101_ReadFIFO_Current(current_buffer, available);
+ *   if (available > 0) MAX30101_ReadSingleCurrent(&sample);
  */
 void MAX30101_InitMuscleOx(float32_t ledPower_red, float32_t ledPower_ir, float32_t ledPower_green) {
     // Configure FIFO: no averaging, rollover enabled
@@ -95,15 +99,16 @@ void MAX30101_InitMuscleOx(float32_t ledPower_red, float32_t ledPower_ir, float3
  * @return uint8_t Number of complete samples available (0 to 32)
  *         - Returns 0 if FIFO empty or pointers equal
  *         - Returns 1 to 32 for available samples
- * @note Call this before MAX30101_ReadFIFO() or MAX30101_ReadFIFO_Current()
- *       to check if new data is ready.
+ * @note Call before MAX30101_ReadSingleCurrentSpO2() or MAX30101_ReadSingleCurrent()
+ *       to confirm new data is ready.
  * @warning Multiple fast consecutive reads may show inconsistent results
  *          due to FIFO updates during pointer reads.
- * @see MAX30101_ReadFIFO, MAX30101_ReadFIFO_Current
+ * @see MAX30101_ReadSingleCurrentSpO2, MAX30101_ReadSingleCurrent, MAX30101_UpdateReadPointer
  * @example
  *   uint8_t count = MAX30101_GetNumAvailableSamples();
  *   if (count > 0) {
- *       MAX30101_ReadFIFO_Current(samples, count);
+ *       MAX30101_ReadSingleCurrentSpO2(&sample);
+ *       MAX30101_UpdateReadPointer(count);
  *   }
  */
 uint8_t MAX30101_GetNumAvailableSamples(void) {
@@ -163,7 +168,8 @@ void MAX30101_ConvertSampleToUint16SpO2(MAX30101_SampleSpO2 *sample_in, MAX30101
 
 /**
  * @brief Convert 16-bit SpO2 ADC samples to calibrated current in nanoamps
- * @details Scales ADC counts using 7.81 pA LSB to nA range (0-2048 nA).
+ * @details Scales ADC counts using 31.25 pA LSB to nA range (0-2048 nA).
+ *          Current (nA) = ADC_Count × 0.03125 nA  (16-bit ADC, 2048 nA full-scale)
  *
  * @param sample_in - [in] Pointer to MAX30101_SampleDataSpO2 with ADC counts
  * @param sample_out - [out] Pointer to MAX30101_SampleCurrentSpO2 for current (nA)
@@ -259,9 +265,9 @@ void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleD
 /**
  * @brief Scale ADC counts to calibrated current (nanoamps)
  * @details Converts 16-bit ADC values to current using:
- *          Current (nA) = ADC_Count × 0.00781 nA
+ *          Current (nA) = ADC_Count × 0.03125 nA
  *          Full range: 0 to 2048 nA
- *          LSB Resolution: 7.81 pA per count
+ *          LSB Resolution: 31.25 pA per count (16-bit ADC, 2048 nA full-scale)
  * @param sample_in - [in] Pointer to MAX30101_SampleData with ADC counts (0–65535)
  * @param sample_out - [out] Pointer to MAX30101_SampleCurrent for current in nanoamps
  * @return void

@@ -1,0 +1,269 @@
+\doxysection{Project/\+\+UART.h File Reference}
+\hypertarget{_u_a_r_t_8h}{}\label{_u_a_r_t_8h}\index{Project/UART.h@{Project/UART.h}}
+
+
+USART2 driver for MAX30101 data transmission.  
+
+
+{\ttfamily \+\#include $<$stdint.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config}} (uint32\+\_\+t baud\+\_\+rate)
+\begin{DoxyCompactList}\small\item\em Initialize USART2 for configurable baud rate transmission. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send}} (uint8\+\_\+t c)
+\begin{DoxyCompactList}\small\item\em Send single character via UART. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_u_a_r_t_8h_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\+\_\+put\+String}} (char \texorpdfstring{$\ast$}{*}string)
+\begin{DoxyCompactList}\small\item\em Send null-\/terminated string via UART. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+USART2 driver for MAX30101 data transmission. 
+
+Configures USART2 (PA2=TX, PA15=RX) at variable baud rate with blocking transmission \begin{DoxyAuthor}{Author}
+Julio Fajardo, PhD 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/06-\/01 
+\end{DoxyDate}
+
+
+Definition in file \doxymbox{\hyperlink{_u_a_r_t_8h_source}{UART.\+h}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{_u_a_r_t_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}\index{UART.h@{UART.h}!UART\_Config@{UART\_Config}}
+\index{UART\_Config@{UART\_Config}!UART.h@{UART.h}}
+\doxysubsubsection{\texorpdfstring{UART\_Config()}{UART\_Config()}}
+{\footnotesize\ttfamily \label{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b} 
+void UART\+\_\+\+Config (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{baud\+\_\+rate}{}\end{DoxyParamCaption})}
+
+
+
+Initialize USART2 for configurable baud rate transmission. 
+
+Configuration sequence:\+
+\begin{DoxyEnumerate}
+\item Enable clocks:\+ USART2, GPIOA
+\item Configure PA2 (TX) and PA15 (RX) as alternate function AF7
+\item Configure USART2:\+ desired baud, 8-\/bit data, 1 stop bit
+\item Enable receiver interrupt
+\end{DoxyEnumerate}
+
+
+\begin{DoxyParams}{Parameters}
+{\em baud\+\_\+rate} & -\/ Desired baud rate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyRetVals}{Return values}
+{\em N/\+A} & \\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Total init time:\+ \texorpdfstring{$<$}{<}1 ms
+\item USART2 ready after:\+ function completes
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyWarning}{Warning}
+
+\begin{DoxyItemize}
+\item Call once at system startup, BEFORE any USART2\+\_\+\+Send operations
+\item External USB-\/\+UART converter required on PA2/\+\+PA15
+\end{DoxyItemize}
+\end{DoxyWarning}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8c_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send}, \doxylink{_u_a_r_t_8c_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\+\_\+put\+String}
+\end{DoxySeeAlso}
+Complete USART2 setup sequence:\+
+\begin{DoxyEnumerate}
+\item Enable GPIOA and USART2 clocks
+\item Configure PA2 (TX) and PA15 (RX) as AF7 (Alternate Function 7)
+\item Configure BRR for desired baud rate
+\item Enable transmitter, receiver, and receiver interrupt
+\end{DoxyEnumerate}
+
+
+\begin{DoxyParams}{Parameters}
+{\em baud\+\_\+rate} & -\/ Desired baud rate (e.\+g., 460800 as used in this project) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Total init time:\+ \texorpdfstring{$<$}{<}1 ms
+\item USART2 ready immediately after function returns
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyWarning}{Warning}
+Call once at system startup, BEFORE any USART2\+\_\+\+Send operations 
+\end{DoxyWarning}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8c_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send}, \doxylink{_u_a_r_t_8c_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\+\_\+put\+String} 
+\end{DoxySeeAlso}
+
+
+Definition at line \doxymbox{\hyperlink{_u_a_r_t_8c_source_l00034}{34}} of file \doxymbox{\hyperlink{_u_a_r_t_8c_source}{UART.\+c}}.
+
+\Hypertarget{_u_a_r_t_8h_a7a083248cb8b42dbc3049f35c92a2dfa}\index{UART.h@{UART.h}!USART2\_putString@{USART2\_putString}}
+\index{USART2\_putString@{USART2\_putString}!UART.h@{UART.h}}
+\doxysubsubsection{\texorpdfstring{USART2\_putString()}{USART2\_putString()}}
+{\footnotesize\ttfamily \label{_u_a_r_t_8h_a7a083248cb8b42dbc3049f35c92a2dfa} 
+void USART2\+\_\+put\+String (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{string}{}\end{DoxyParamCaption})}
+
+
+
+Send null-\/terminated string via UART. 
+
+Transmits string character-\/by-\/character using \doxylink{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send()}
+
+
+\begin{DoxyParams}{Parameters}
+{\em string} & -\/ Pointer to null-\/terminated character string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyRetVals}{Return values}
+{\em N/\+A} & (blocking)\\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Per-\/character latency:\+ \texorpdfstring{$\sim$}{\string~}22 µs at 460800 baud (10 bits/\+byte:\+ 8N1)
+\item For 10-\/char string:\+ \texorpdfstring{$\sim$}{\string~}220 µs; typical CSV frame \texorpdfstring{$\sim$}{\string~}350 µs
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Data Format:\+}
+
+\begin{DoxyItemize}
+\item String must be null-\/terminated
+\item Each character transmitted as 8-\/bit value
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Usage Example:\+}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\doxymbox{\hyperlink{_u_a_r_t_8c_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\_putString}}(\textcolor{stringliteral}{"{}Hello\ UART\(\backslash\)r"{}});}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config}, \doxylink{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send}
+\end{DoxySeeAlso}
+Send null-\/terminated string via UART.
+
+Transmits string character-\/by-\/character using \doxylink{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send()}
+
+
+\begin{DoxyParams}{Parameters}
+{\em string} & -\/ Pointer to null-\/terminated character string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Per-\/character latency:\+ \texorpdfstring{$\sim$}{\string~}22 µs at 460800 baud (10 bits/\+byte:\+ 8N1)
+\item Example:\+ 10-\/character string ≈ 220 µs total; typical CSV frame \texorpdfstring{$\sim$}{\string~}350 µs
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Data Format:\+ String must be null-\/terminated (\textbackslash{}0)}
+
+\end{DoxyParagraph}
+\begin{DoxyNote}{Note}
+Blocking function; waits for each character\textquotesingle{}s transmission 
+\end{DoxyNote}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config}, \doxylink{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}{USART2\+\_\+\+Send} 
+\end{DoxySeeAlso}
+
+
+Definition at line \doxymbox{\hyperlink{_u_a_r_t_8c_source_l00093}{93}} of file \doxymbox{\hyperlink{_u_a_r_t_8c_source}{UART.\+c}}.
+
+\Hypertarget{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9}\index{UART.h@{UART.h}!USART2\_Send@{USART2\_Send}}
+\index{USART2\_Send@{USART2\_Send}!UART.h@{UART.h}}
+\doxysubsubsection{\texorpdfstring{USART2\_Send()}{USART2\_Send()}}
+{\footnotesize\ttfamily \label{_u_a_r_t_8h_a8d809a6eeeb94a3f4a0ff30dbaf9a1e9} 
+void USART2\+\_\+\+Send (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{c}{}\end{DoxyParamCaption})}
+
+
+
+Send single character via UART. 
+
+Blocks until previous transmission complete, then sends one byte
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & -\/ Character byte to transmit \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyRetVals}{Return values}
+{\em N/\+A} & (blocking)\\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Per-\/byte latency:\+ \texorpdfstring{$\sim$}{\string~}22 µs at 460800 baud (10 bits/\+byte:\+ 8N1)
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Data Format:\+}
+
+\begin{DoxyItemize}
+\item UART parameters:\+ 8-\/bit, 1 stop bit, no parity (8N1)
+\item Baud rate:\+ configured via \doxylink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config()} — 460800 in this project
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config}, \doxylink{_u_a_r_t_8h_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\+\_\+put\+String}
+\end{DoxySeeAlso}
+Send single character via UART.
+
+Blocks until previous transmission complete, then sends one byte
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & -\/ Character byte to transmit \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void
+\end{DoxyReturn}
+\begin{DoxyParagraph}{Timing:\+}
+
+\begin{DoxyItemize}
+\item Per-\/byte latency:\+ \texorpdfstring{$\sim$}{\string~}22 µs at 460800 baud (10 bits/\+byte:\+ 8N1)
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyNote}{Note}
+Blocking function; waits for TC (transmission complete) flag 
+\end{DoxyNote}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_u_a_r_t_8h_a77f7f2f6837c7bf4223c7cdc0470585b}{UART\+\_\+\+Config}, \doxylink{_u_a_r_t_8h_a7a083248cb8b42dbc3049f35c92a2dfa}{USART2\+\_\+put\+String} 
+\end{DoxySeeAlso}
+
+
+Definition at line \doxymbox{\hyperlink{_u_a_r_t_8c_source_l00071}{71}} of file \doxymbox{\hyperlink{_u_a_r_t_8c_source}{UART.\+c}}.
+

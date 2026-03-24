@@ -1,0 +1,151 @@
+\doxysection{Project/\+\+PLL.h File Reference}
+\hypertarget{_p_l_l_8h}{}\label{_p_l_l_8h}\index{Project/PLL.h@{Project/PLL.h}}
+
+
+PLL and System Clock Configuration Driver (STM32\+F303\+K8).  
+
+
+{\ttfamily \+\#include $<$stdint.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}{clk\+\_\+config}} (void)
+\begin{DoxyCompactList}\small\item\em Configure system clock to 64 MHz using PLL. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+PLL and System Clock Configuration Driver (STM32\+F303\+K8). 
+
+Phase-\/\+Locked Loop (PLL) configuration for system clock setup.\hypertarget{_p_l_l_8h_autotoc_md16}{}\doxysubsubsubsection{\texorpdfstring{Hardware Configuration}{Hardware Configuration}}\label{_p_l_l_8h_autotoc_md16}
+
+\begin{DoxyItemize}
+\item {\bfseries{MCU}}:\+ STM32\+F303\+K8 (Cortex-\/\+M4)
+\item {\bfseries{Target System Clock}}:\+ 64 MHz (using PLL)
+\item {\bfseries{Clock Source}}:\+ Internal HSI (8 MHz)
+\item {\bfseries{PLL Multiplier}}:\+ 16x via direct calculation (8 MHz /\+ 2) × 16 = 64 MHz
+\item {\bfseries{AHB Prescaler}}:\+ 1 (no division)
+\item {\bfseries{APB1 Prescaler}}:\+ 2 (32 MHz for I2C and most peripherals)
+\item {\bfseries{APB2 Prescaler}}:\+ 1 (64 MHz)
+\end{DoxyItemize}\hypertarget{_p_l_l_8h_autotoc_md17}{}\doxysubsubsubsection{\texorpdfstring{Flash Configuration}{Flash Configuration}}\label{_p_l_l_8h_autotoc_md17}
+
+\begin{DoxyItemize}
+\item {\bfseries{Flash Latency}}:\+ 2 wait states (required for 64 MHz operation)
+\end{DoxyItemize}\hypertarget{_p_l_l_8h_autotoc_md18}{}\doxysubsubsubsection{\texorpdfstring{System Clock Tree}{System Clock Tree}}\label{_p_l_l_8h_autotoc_md18}
+
+\begin{DoxyItemize}
+\item HSI (8 MHz) → PLL (÷2 → ×16) → SYSCLK (64 MHz)
+\item SYSCLK → AHB (64 MHz) → APB1 (32 MHz), APB2 (64 MHz)
+\end{DoxyItemize}
+
+\begin{DoxyAuthor}{Author}
+Julio Fajardo 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/06-\/01 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}
+\begin{DoxyNote}{Note}
+Configures for 64 MHz, allowing I2\+C1 to operate at 400 k\+Hz with APB1 @ 32 MHz 
+
+Call \doxylink{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}{clk\+\_\+config()} before initializing any peripheral that depends on system clock 
+\end{DoxyNote}
+
+
+Definition in file \doxymbox{\hyperlink{_p_l_l_8h_source}{PLL.\+h}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{_p_l_l_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}\index{PLL.h@{PLL.h}!clk\_config@{clk\_config}}
+\index{clk\_config@{clk\_config}!PLL.h@{PLL.h}}
+\doxysubsubsection{\texorpdfstring{clk\_config()}{clk\_config()}}
+{\footnotesize\ttfamily \label{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c} 
+void clk\+\_\+config (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Configure system clock to 64 MHz using PLL. 
+
+Complete PLL and RCC configuration sequence:\+
+\begin{DoxyEnumerate}
+\item Set PLL multiplier to 16 (HSI input, internal ÷2)
+\item Configure Flash for 64 MHz operation (2 wait states)
+\item Enable PLL oscillator
+\item Set APB1 prescaler to 2 (32 MHz)
+\item Switch SYSCLK source from HSI to PLL
+\item Update System\+Core\+Clock variable
+\end{DoxyEnumerate}\hypertarget{_p_l_l_8h_autotoc_md19}{}\doxysubsubsubsection{\texorpdfstring{Register Operations}{Register Operations}}\label{_p_l_l_8h_autotoc_md19}
+
+\begin{DoxyItemize}
+\item RCC\+\_\+\+CFGR\+[21:\+18]\+ = 0x0E (PLLMUL = 16)
+\item FLASH\+\_\+\+ACR\+[2:\+0]\+ = 0x2 (Latency = 2 cycles)
+\item RCC\+\_\+\+CR\+[24]\+ = 1 (Enable PLL)
+\item RCC\+\_\+\+CFGR\+[1:\+0]\+ = 0x2 (SW = PLL as system clock)
+\item RCC\+\_\+\+CFGR\+[10:\+8]\+ = 0x4 (PPRE1 = APB1 divide by 2)
+\end{DoxyItemize}\hypertarget{_p_l_l_8h_autotoc_md20}{}\doxysubsubsubsection{\texorpdfstring{Timing}{Timing}}\label{_p_l_l_8h_autotoc_md20}
+
+\begin{DoxyItemize}
+\item PLL lock time:\+ \texorpdfstring{$<$}{<}100 µs (typical)
+\item Configuration time:\+ \texorpdfstring{$<$}{<}1 ms
+\item Non-\/blocking operation
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyRetVals}{Return values}
+{\em N/\+A} & \\
+\hline
+\end{DoxyRetVals}
+Complete PLL and RCC configuration sequence:\+
+\begin{DoxyEnumerate}
+\item Set PLLMUL to 0x0E (×16) for HSI input
+\item Configure Flash for 64 MHz operation (2 wait states)
+\item Enable PLL oscillator and wait for lock
+\item Set APB1 prescaler to 2 (32 MHz)
+\item Switch SYSCLK source from HSI to PLL
+\item Update System\+Core\+Clock variable
+\end{DoxyEnumerate}\hypertarget{_p_l_l_8h_autotoc_md14}{}\doxysubsubsubsection{\texorpdfstring{Clock Calculation (STM32\+F303\+K8)}{Clock Calculation (STM32\+F303\+K8)}}\label{_p_l_l_8h_autotoc_md14}
+
+\begin{DoxyItemize}
+\item Input:\+ HSI = 8 MHz
+\item PLL Multiplier:\+ 16 (PLLMUL = 0x0E)
+\item SYSCLK = (8 MHz /\+ 2) × 16 = 64 MHz
+\item AHB Clock:\+ 64 MHz (no prescaler)
+\item APB1 Clock:\+ 32 MHz (prescaler = 2)
+\item APB2 Clock:\+ 64 MHz (no prescaler)
+\end{DoxyItemize}\hypertarget{_p_l_l_8h_autotoc_md15}{}\doxysubsubsubsection{\texorpdfstring{Register Operations}{Register Operations}}\label{_p_l_l_8h_autotoc_md15}
+
+\begin{DoxyItemize}
+\item RCC\+\_\+\+CFGR\+[21:\+18]\+ = 0x0E (PLLMUL = 16)
+\item FLASH\+\_\+\+ACR\+[2:\+0]\+ = 0x2 (Latency = 2 cycles for 64 MHz)
+\item RCC\+\_\+\+CR\+[24]\+ = 1 (Enable PLL)
+\item RCC\+\_\+\+CFGR\+[1:\+0]\+ = 0x2 (SW = PLL)
+\item RCC\+\_\+\+CFGR\+[10:\+8]\+ = 0x4 (PPRE1 = divide by 2)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_p_l_l_8c_source_l00032}{32}} of file \doxymbox{\hyperlink{_p_l_l_8c_source}{PLL.\+c}}.
+

@@ -1,0 +1,371 @@
+\doxysection{Project/\+\+MAX30101.c File Reference}
+\hypertarget{_m_a_x30101_8c}{}\label{_m_a_x30101_8c}\index{Project/MAX30101.c@{Project/MAX30101.c}}
+
+
+MAX30101 optical biosensor driver implementation for NIRS measurements.  
+
+
+{\ttfamily \+\#include "{}MAX30101.\+h"{}}\newline
+{\ttfamily \+\#include "{}I2\+C.\+h"{}}\newline
+{\ttfamily \+\#include "{}arm\+\_\+math\+\_\+types.\+h"{}}\newline
+{\ttfamily \+\#include $<$stdint.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a7f84d2901029f64997a32757e15a8d05}{MAX30101\+\_\+\+Init\+SPO2\+Lite}} (float32\+\_\+t led\+Power\+\_\+red, float32\+\_\+t led\+Power\+\_\+ir)
+\begin{DoxyCompactList}\small\item\em Initialize MAX30101 in Sp\+O2 mode (dual-\/\+LED:\+ Red + IR). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a3feeb46401027037bd8b9b134c6fe6de}{MAX30101\+\_\+\+Init\+Muscle\+Ox}} (float32\+\_\+t led\+Power\+\_\+red, float32\+\_\+t led\+Power\+\_\+ir, float32\+\_\+t led\+Power\+\_\+green)
+\begin{DoxyCompactList}\small\item\em Initialize MAX30101 for NIRS muscle oxygenation (multi-\/\+LED:\+ Red + IR + Green). \end{DoxyCompactList}\item 
+uint8\+\_\+t \doxymbox{\hyperlink{_m_a_x30101_8c_a8a7cab2225b858a2316022bfd3185c90}{MAX30101\+\_\+\+Get\+Num\+Available\+Samples}} (void)
+\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a4bbff8ee0cee4a79822ea1deef8ebb11}{MAX30101\+\_\+\+Update\+Read\+Pointer}} (uint8\+\_\+t num\+\_\+samples)
+\begin{DoxyCompactList}\small\item\em Update the FIFO read pointer. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_ae6f38354e4b3cfa09fb4d855a2ec9983}{MAX30101\+\_\+\+Convert\+Sample\+To\+Uint16\+Sp\+O2}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_sp_o2}{MAX30101\+\_\+\+Sample\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample\+\_\+in, \doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample\+\_\+out)
+\begin{DoxyCompactList}\small\item\em Convert raw Sp\+O2 sample bytes to 16-\/bit ADC counts. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a73a81e41cd68567aeacf7f1cae2de782}{MAX30101\+\_\+\+Convert\+Uint16\+To\+Current\+Sp\+O2}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample\+\_\+in, \doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample\+\_\+out)
+\begin{DoxyCompactList}\small\item\em Convert 16-\/bit Sp\+O2 ADC samples to calibrated current in nanoamps. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a9333bdf3c6eaf88b61a865df59a381aa}{MAX30101\+\_\+\+Read\+Single\+Data\+Sp\+O2}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample)
+\begin{DoxyCompactList}\small\item\em Read single Sp\+O2 sample from MAX30101 FIFO as 16-\/bit ADC counts. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a37e6e11afbe225c12a1a6ba0f791e10b}{MAX30101\+\_\+\+Read\+Single\+Current\+Sp\+O2}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} \texorpdfstring{$\ast$}{*}sample)
+\begin{DoxyCompactList}\small\item\em Read single Sp\+O2 sample from MAX30101 FIFO with current conversion. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_af3961815f2082ad8db546c068ff1ce33}{MAX30101\+\_\+\+Convert\+Sample\+To\+Uint16}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample}{MAX30101\+\_\+\+Sample}} \texorpdfstring{$\ast$}{*}sample\+\_\+in, \doxymbox{\hyperlink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data}} \texorpdfstring{$\ast$}{*}sample\+\_\+out)
+\begin{DoxyCompactList}\small\item\em Convert raw multi-\/\+LED bytes to 16-\/bit ADC counts (0-\/65535). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a083ca48a8652b600591d581058224c1d}{MAX30101\+\_\+\+Convert\+Uint16\+To\+Current}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data}} \texorpdfstring{$\ast$}{*}sample\+\_\+in, \doxymbox{\hyperlink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current}} \texorpdfstring{$\ast$}{*}sample\+\_\+out)
+\begin{DoxyCompactList}\small\item\em Convert multi-\/\+LED ADC counts to current in nanoamps (0-\/2048 nA). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{_m_a_x30101_8c_a6d9090495560e4c4af4f4e11015c8994}{MAX30101\+\_\+\+Read\+Single\+Current}} (\doxymbox{\hyperlink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current}} \texorpdfstring{$\ast$}{*}sample)
+\begin{DoxyCompactList}\small\item\em Read single multi-\/\+LED sample from MAX30101 FIFO with current conversion. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+MAX30101 optical biosensor driver implementation for NIRS measurements. 
+
+Complete driver for Maxim Integrated MAX30101 optical sensor supporting multi-\/\+LED and Sp\+O2 measurement modes with I2C communication interface. \begin{DoxyAuthor}{Author}
+Julio Fajardo, PhD 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/06-\/01 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+2.\+0 
+\end{DoxyVersion}
+
+
+Definition in file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{_m_a_x30101_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{_m_a_x30101_8c_af3961815f2082ad8db546c068ff1ce33}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ConvertSampleToUint16@{MAX30101\_ConvertSampleToUint16}}
+\index{MAX30101\_ConvertSampleToUint16@{MAX30101\_ConvertSampleToUint16}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ConvertSampleToUint16()}{MAX30101\_ConvertSampleToUint16()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_af3961815f2082ad8db546c068ff1ce33} 
+void MAX30101\+\_\+\+Convert\+Sample\+To\+Uint16 (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample}{MAX30101\+\_\+\+Sample}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+in}{, }\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+out}{}\end{DoxyParamCaption})}
+
+
+
+Convert raw multi-\/\+LED bytes to 16-\/bit ADC counts (0-\/65535). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample\+\_\+in} & -\/ \+[in]\+ \doxylink{struct_m_a_x30101___sample}{MAX30101\+\_\+\+Sample} with raw byte pairs (6 bytes) \\
+\hline
+{\em sample\+\_\+out} & -\/ \+[out]\+ \doxylink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data} with uint16 counts (3 channels) \\
+\hline
+\end{DoxyParams}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00251}{251}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_ae6f38354e4b3cfa09fb4d855a2ec9983}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ConvertSampleToUint16SpO2@{MAX30101\_ConvertSampleToUint16SpO2}}
+\index{MAX30101\_ConvertSampleToUint16SpO2@{MAX30101\_ConvertSampleToUint16SpO2}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ConvertSampleToUint16SpO2()}{MAX30101\_ConvertSampleToUint16SpO2()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_ae6f38354e4b3cfa09fb4d855a2ec9983} 
+void MAX30101\+\_\+\+Convert\+Sample\+To\+Uint16\+Sp\+O2 (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_sp_o2}{MAX30101\+\_\+\+Sample\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+in}{, }\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+out}{}\end{DoxyParamCaption})}
+
+
+
+Convert raw Sp\+O2 sample bytes to 16-\/bit ADC counts. 
+
+Convert raw Sp\+O2 bytes to 16-\/bit ADC counts (0-\/65535).
+
+Combines 2-\/byte pairs (MSB, LSB) into 16-\/bit values per channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample\+\_\+in} & -\/ \+[in]\+ Pointer to \doxylink{struct_m_a_x30101___sample_sp_o2}{MAX30101\+\_\+\+Sample\+Sp\+O2} with raw data \\
+\hline
+{\em sample\+\_\+out} & -\/ \+[out]\+ Pointer to \doxylink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2} for counts (0-\/65535) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_m_a_x30101_8h_a73a81e41cd68567aeacf7f1cae2de782}{MAX30101\+\_\+\+Convert\+Uint16\+To\+Current\+Sp\+O2} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00162}{162}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a083ca48a8652b600591d581058224c1d}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ConvertUint16ToCurrent@{MAX30101\_ConvertUint16ToCurrent}}
+\index{MAX30101\_ConvertUint16ToCurrent@{MAX30101\_ConvertUint16ToCurrent}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ConvertUint16ToCurrent()}{MAX30101\_ConvertUint16ToCurrent()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a083ca48a8652b600591d581058224c1d} 
+void MAX30101\+\_\+\+Convert\+Uint16\+To\+Current (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+in}{, }\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+out}{}\end{DoxyParamCaption})}
+
+
+
+Convert multi-\/\+LED ADC counts to current in nanoamps (0-\/2048 nA). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample\+\_\+in} & -\/ \+[in]\+ \doxylink{struct_m_a_x30101___sample_data}{MAX30101\+\_\+\+Sample\+Data} with ADC counts \\
+\hline
+{\em sample\+\_\+out} & -\/ \+[out]\+ \doxylink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current} with nA values (Red, IR, Green) \\
+\hline
+\end{DoxyParams}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00284}{284}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a73a81e41cd68567aeacf7f1cae2de782}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ConvertUint16ToCurrentSpO2@{MAX30101\_ConvertUint16ToCurrentSpO2}}
+\index{MAX30101\_ConvertUint16ToCurrentSpO2@{MAX30101\_ConvertUint16ToCurrentSpO2}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ConvertUint16ToCurrentSpO2()}{MAX30101\_ConvertUint16ToCurrentSpO2()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a73a81e41cd68567aeacf7f1cae2de782} 
+void MAX30101\+\_\+\+Convert\+Uint16\+To\+Current\+Sp\+O2 (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+in}{, }\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample\+\_\+out}{}\end{DoxyParamCaption})}
+
+
+
+Convert 16-\/bit Sp\+O2 ADC samples to calibrated current in nanoamps. 
+
+Convert Sp\+O2 ADC counts to current in nanoamps (0-\/2048 nA).
+
+Scales ADC counts using 31.\+25 pA LSB to nA range (0-\/2048 nA). Current (nA) = ADC\+\_\+\+Count × 0.\+03125 nA (16-\/bit ADC, 2048 nA full-\/scale)
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample\+\_\+in} & -\/ \+[in]\+ Pointer to \doxylink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2} with ADC counts \\
+\hline
+{\em sample\+\_\+out} & -\/ \+[out]\+ Pointer to \doxylink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2} for current (nA) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Current\+Sp\+O2 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00179}{179}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a8a7cab2225b858a2316022bfd3185c90}\index{MAX30101.c@{MAX30101.c}!MAX30101\_GetNumAvailableSamples@{MAX30101\_GetNumAvailableSamples}}
+\index{MAX30101\_GetNumAvailableSamples@{MAX30101\_GetNumAvailableSamples}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_GetNumAvailableSamples()}{MAX30101\_GetNumAvailableSamples()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a8a7cab2225b858a2316022bfd3185c90} 
+uint8\+\_\+t MAX30101\+\_\+\+Get\+Num\+Available\+Samples (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+Query number of unread samples in FIFO (0-\/32) \begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}, and \doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00114}{114}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a3feeb46401027037bd8b9b134c6fe6de}\index{MAX30101.c@{MAX30101.c}!MAX30101\_InitMuscleOx@{MAX30101\_InitMuscleOx}}
+\index{MAX30101\_InitMuscleOx@{MAX30101\_InitMuscleOx}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_InitMuscleOx()}{MAX30101\_InitMuscleOx()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a3feeb46401027037bd8b9b134c6fe6de} 
+void MAX30101\+\_\+\+Init\+Muscle\+Ox (\begin{DoxyParamCaption}\item[{float32\+\_\+t}]{led\+Power\+\_\+red}{, }\item[{float32\+\_\+t}]{led\+Power\+\_\+ir}{, }\item[{float32\+\_\+t}]{led\+Power\+\_\+green}{}\end{DoxyParamCaption})}
+
+
+
+Initialize MAX30101 for NIRS muscle oxygenation (multi-\/\+LED:\+ Red + IR + Green). 
+
+Configures sensor for tissue oxygenation measurement with 3 LEDs. Sample rate:\+ 50 Hz, FIFO rollover enabled, configurable LED power. 
+\begin{DoxyParams}{Parameters}
+{\em led\+Power\+\_\+red} & -\/ Red LED current value (0.\+0 to 51 mA range) \\
+\hline
+{\em led\+Power\+\_\+ir} & -\/ IR LED current value (0.\+0 to 51 mA range) \\
+\hline
+{\em led\+Power\+\_\+green} & -\/ Green LED current value (0.\+0 to 51 mA range) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Call once at startup before MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Current() 
+\end{DoxyNote}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_m_a_x30101_8h_a7f84d2901029f64997a32757e15a8d05}{MAX30101\+\_\+\+Init\+SPO2\+Lite} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00075}{75}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a7f84d2901029f64997a32757e15a8d05}\index{MAX30101.c@{MAX30101.c}!MAX30101\_InitSPO2Lite@{MAX30101\_InitSPO2Lite}}
+\index{MAX30101\_InitSPO2Lite@{MAX30101\_InitSPO2Lite}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_InitSPO2Lite()}{MAX30101\_InitSPO2Lite()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a7f84d2901029f64997a32757e15a8d05} 
+void MAX30101\+\_\+\+Init\+SPO2\+Lite (\begin{DoxyParamCaption}\item[{float32\+\_\+t}]{led\+Power\+\_\+red}{, }\item[{float32\+\_\+t}]{led\+Power\+\_\+ir}{}\end{DoxyParamCaption})}
+
+
+
+Initialize MAX30101 in Sp\+O2 mode (dual-\/\+LED:\+ Red + IR). 
+
+Configures sensor for blood oxygen measurement with low power consumption. Sample rate:\+ 50 Hz, FIFO rollover enabled, configurable LED power. 
+\begin{DoxyParams}{Parameters}
+{\em led\+Power\+\_\+red} & -\/ Red LED current value (0.\+0 to 51 mA range) \\
+\hline
+{\em led\+Power\+\_\+ir} & -\/ IR LED current value (0.\+0 to 51 mA range) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Call once at startup before MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Current\+Sp\+O2() 
+\end{DoxyNote}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_m_a_x30101_8h_a3feeb46401027037bd8b9b134c6fe6de}{MAX30101\+\_\+\+Init\+Muscle\+Ox} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}, and \doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00036}{36}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a6d9090495560e4c4af4f4e11015c8994}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ReadSingleCurrent@{MAX30101\_ReadSingleCurrent}}
+\index{MAX30101\_ReadSingleCurrent@{MAX30101\_ReadSingleCurrent}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ReadSingleCurrent()}{MAX30101\_ReadSingleCurrent()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a6d9090495560e4c4af4f4e11015c8994} 
+void MAX30101\+\_\+\+Read\+Single\+Current (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current}} \texorpdfstring{$\ast$}{*}}]{sample}{}\end{DoxyParamCaption})}
+
+
+
+Read single multi-\/\+LED sample from MAX30101 FIFO with current conversion. 
+
+Read single multi-\/\+LED sample from FIFO with current conversion.
+
+Optimized function for reading one sample at a time. Reads 6 bytes from FIFO (Red, IR, Green) and converts to nA immediately.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample} & -\/ \+[out]\+ Pointer to \doxylink{struct_m_a_x30101___sample_current}{MAX30101\+\_\+\+Sample\+Current} for result \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Current, \doxylink{_m_a_x30101_8h_a8a7cab2225b858a2316022bfd3185c90}{MAX30101\+\_\+\+Get\+Num\+Available\+Samples} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00304}{304}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a37e6e11afbe225c12a1a6ba0f791e10b}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ReadSingleCurrentSpO2@{MAX30101\_ReadSingleCurrentSpO2}}
+\index{MAX30101\_ReadSingleCurrentSpO2@{MAX30101\_ReadSingleCurrentSpO2}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ReadSingleCurrentSpO2()}{MAX30101\_ReadSingleCurrentSpO2()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a37e6e11afbe225c12a1a6ba0f791e10b} 
+void MAX30101\+\_\+\+Read\+Single\+Current\+Sp\+O2 (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample}{}\end{DoxyParamCaption})}
+
+
+
+Read single Sp\+O2 sample from MAX30101 FIFO with current conversion. 
+
+Read single Sp\+O2 sample from FIFO with current conversion.
+
+Optimized function for reading one sample at a time. Reads 4 bytes from FIFO and converts to nA immediately.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample} & -\/ \+[out]\+ Pointer to \doxylink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2} for result \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Current\+Sp\+O2, \doxylink{_m_a_x30101_8h_a8a7cab2225b858a2316022bfd3185c90}{MAX30101\+\_\+\+Get\+Num\+Available\+Samples} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}, and \doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00217}{217}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a9333bdf3c6eaf88b61a865df59a381aa}\index{MAX30101.c@{MAX30101.c}!MAX30101\_ReadSingleDataSpO2@{MAX30101\_ReadSingleDataSpO2}}
+\index{MAX30101\_ReadSingleDataSpO2@{MAX30101\_ReadSingleDataSpO2}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_ReadSingleDataSpO2()}{MAX30101\_ReadSingleDataSpO2()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a9333bdf3c6eaf88b61a865df59a381aa} 
+void MAX30101\+\_\+\+Read\+Single\+Data\+Sp\+O2 (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2}} \texorpdfstring{$\ast$}{*}}]{sample}{}\end{DoxyParamCaption})}
+
+
+
+Read single Sp\+O2 sample from MAX30101 FIFO as 16-\/bit ADC counts. 
+
+Read single Sp\+O2 sample from FIFO as 16-\/bit ADC counts.
+
+Optimized function for reading one sample at a time. Reads 4 bytes from FIFO and returns as raw 16-\/bit ADC values (0-\/65535).
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample} & -\/ \+[out]\+ Pointer to \doxylink{struct_m_a_x30101___sample_data_sp_o2}{MAX30101\+\_\+\+Sample\+Data\+Sp\+O2} for result \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+MAX30101\+\_\+\+Read\+FIFO\+\_\+\+Data\+Sp\+O2, \doxylink{_m_a_x30101_8h_a8a7cab2225b858a2316022bfd3185c90}{MAX30101\+\_\+\+Get\+Num\+Available\+Samples} 
+\end{DoxySeeAlso}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00195}{195}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+
+\Hypertarget{_m_a_x30101_8c_a4bbff8ee0cee4a79822ea1deef8ebb11}\index{MAX30101.c@{MAX30101.c}!MAX30101\_UpdateReadPointer@{MAX30101\_UpdateReadPointer}}
+\index{MAX30101\_UpdateReadPointer@{MAX30101\_UpdateReadPointer}!MAX30101.c@{MAX30101.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_UpdateReadPointer()}{MAX30101\_UpdateReadPointer()}}
+{\footnotesize\ttfamily \label{_m_a_x30101_8c_a4bbff8ee0cee4a79822ea1deef8ebb11} 
+void MAX30101\+\_\+\+Update\+Read\+Pointer (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{num\+\_\+samples}{}\end{DoxyParamCaption})}
+
+
+
+Update the FIFO read pointer. 
+
+Advances the read pointer by a specified number of samples, wrapping around at 32. 
+\begin{DoxyParams}{Parameters}
+{\em num\+\_\+samples} & -\/ \+[in]\+ Number of samples to advance the read pointer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2_m_a_x30101_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+\+MAX30101.\+c}}, and \doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{_m_a_x30101_8c_source_l00143}{143}} of file \doxymbox{\hyperlink{_m_a_x30101_8c_source}{MAX30101.\+c}}.
+

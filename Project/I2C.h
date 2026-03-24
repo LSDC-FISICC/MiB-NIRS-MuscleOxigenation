@@ -18,7 +18,7 @@
  *
  * ### Driver Characteristics
  *  - **Write latency**: ~30-50 µs per byte (2 bytes minimum per transaction)
- *  - **Read latency**: ~100-150 µs per byte (repeated START adds ~50 µs overhead)
+ *  - **Read latency**: ~100 µs overhead + ~30 µs/byte (repeated START; e.g. 6 bytes ≈ 280 µs)
  *  - **Blocking**: Yes (waits for bus/flags; no interrupts or DMA)
  *  - **Thread-safe**: No (not safe for concurrent I2C accesses)
  *

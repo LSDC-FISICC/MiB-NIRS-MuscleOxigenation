@@ -19,7 +19,7 @@
  *  - **Typical LED consumption**: ~10-20 mA (for standard 3mm/5mm LED)
  *
  * ### Usage Context
- *  - **Primary purpose**: SysTick ISR feedback (100 ms toggle = 5 Hz blink)
+ *  - **Primary purpose**: SysTick ISR feedback (20 ms toggle = 25 Hz blink)
  *  - **Non-critical**: LED state does not affect sensor operation
  *  - **No blocking**: All operations are non-blocking GPIO writes
  *  - **Timing**: Register writes ~1 CPU cycle (<20 ns)
@@ -101,7 +101,7 @@ void LED_Off(void);
  *          Non-blocking; takes one RMW to GPIO ODR register (~30 ns).
  * @param None
  * @return void
- * @note Called from SysTick_Handler() every 100 ms for 5 Hz visual feedback
+ * @note Called from SysTick_Handler() every 20 ms → 25 Hz blink (20 ms on, 20 ms off)
  * @see LED_On, LED_Off
  */
 void LED_Toggle(void);

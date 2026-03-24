@@ -4,7 +4,7 @@
  * @details Simple push-pull GPIO driver for visual feedback LED on port PB3.
  * @author Julio Fajardo, PhD
  * @date 2024-06-01
- * @version 1.0
+ * @version 2.0
  */
 
 #include "LED.h"
@@ -15,7 +15,7 @@
  * @details Complete GPIO setup for LED control:
  *          1. **Enable GPIOB peripheral clock** (AHB domain)
  *          2. **Configure PB3 mode** as output (push-pull)
- *          3. **Configure PB4 mode** as output (allocated for I2C1 alternate function)
+ *          3. **Configure PB4 mode** as output (reserved for future use)
  *          4. **Ensure push-pull type** (OTYPER[3]=0, OTYPER[4]=0)
  *          5. Ready for ODR writes (LED_On, LED_Off, LED_Toggle)
  *
@@ -32,13 +32,13 @@
  *  - GPIOB->MODER |= (1<<6) | (1<<8)
  *    Set bits [6]=1 (PB3 mode[0]=1) and [8]=1 (PB4 mode[0]=1)
  *    Result: MODER[7:6] = 01 (PB3 = output), MODER[9:8] = 01 (PB4 = output)
- *    Note: PB4 is reconfigured by I2C1_Config() to alternate function (AF4) after this call
+ *    Note: PB4 is configured as output here; I2C1 uses PB6/PB7 (AF4), not PB4
  *
  * ### GPIO State After Config
  *  | Feature | PB3 | PB4 |
  *  |---------|-----|-----|
- *  | Mode | Output | Output (but overridden I2C) |
- *  | Type | Push-pull | Push-pull (OD disabled) |
+ *  | Mode | Output | Output (reserved) |
+ *  | Type | Push-pull | Push-pull |
  *  | Speed | Medium | Medium |
  *  | Initial ODR | 0 (LOW) | 0 (LOW) |
  *  | Pull | None | None |
@@ -113,7 +113,7 @@ void LED_Off(void) {
  * @param None
  * @return void
  * @timing ~30-50 ns latency
- * @note Called from SysTick_Handler() for visual feedback
+ * @note Called from SysTick_Handler() every 20 ms → 25 Hz blink (20 ms on, 20 ms off)
  * @see LED_On, LED_Off, LED_config
  */
 void LED_Toggle(void) {

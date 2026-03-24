@@ -1,0 +1,157 @@
+\doxysection{Project/\+main.c File Reference}
+\hypertarget{main_8c}{}\label{main_8c}\index{Project/main.c@{Project/main.c}}
+
+
+Main program for MAX30101 muscle oxygenation measurement.  
+
+
+{\ttfamily \+\#include "{}stm32f303x8.\+h"{}}\newline
+{\ttfamily \+\#include $<$stdint.\+h$>$}\newline
+{\ttfamily \+\#include $<$stdio.\+h$>$}\newline
+{\ttfamily \+\#include "{}PLL.\+h"{}}\newline
+{\ttfamily \+\#include "{}LED.\+h"{}}\newline
+{\ttfamily \+\#include "{}I2\+C.\+h"{}}\newline
+{\ttfamily \+\#include "{}MAX30101.\+h"{}}\newline
+{\ttfamily \+\#include "{}UART.\+h"{}}\newline
+{\ttfamily \+\#include "{}arm\+\_\+math.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\+\#define \doxymbox{\hyperlink{main_8c_a5fd0f310120c34ad942fb3e34c105760}{SYSTICK\+\_\+\+FREQ\+\_\+\+HZ}}~50
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \doxymbox{\hyperlink{main_8c_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
+\item 
+void \doxymbox{\hyperlink{main_8c_ab5e09814056d617c521549e542639b7e}{Sys\+Tick\+\_\+\+Handler}} (void)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+volatile uint8\+\_\+t \doxymbox{\hyperlink{main_8c_a94211eb6e46fe516cad28f8740e34377}{data\+\_\+ready}} = 0
+\item 
+char \doxymbox{\hyperlink{main_8c_a0d616c40e131213e4db5d256f1d24e29}{tx\+\_\+buffer}} \+[100]\+
+\item 
+\doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} \doxymbox{\hyperlink{main_8c_af0893b95cb870eaed882ea9bc14d8ace}{MAX30101\+\_\+\+Single\+Sample\+Current\+Sp\+O2}}
+\begin{DoxyCompactList}\small\item\em FINAL PROCESSED DATA:\+ Calibrated current in nanoamps (nA). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main program for MAX30101 muscle oxygenation measurement. 
+
+Initializes MAX30101 sensor for NIRS muscle oxygenation using I2C interface. Configures system clock to 64 MHz, GPIO LED on PB3, and Sys\+Tick timer for 20 ms interrupts. MAX30101 configured with dual LEDs (Red, IR) at 50 Hz sample rate and medium LED power for optimal tissue penetration in muscle oxygenation applications. \begin{DoxyAuthor}{Author}
+Julio Fajardo, PhD 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/06-\/01 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}
+\begin{DoxySeeAlso}{See also}
+\doxylink{_p_l_l_8h_af2f06cca719d7bf8120401b18b0c792c}{clk\+\_\+config}, \doxylink{_l_e_d_8c_a1eba03f25b9d10a66d906572d494d731}{LED\+\_\+config}, \doxylink{_i2_c_8c_aeb07abc3e8d8d8ad6b7e69cb4992dec8}{I2\+C1\+\_\+\+Config}, \doxylink{_m_a_x30101_8c_a7f84d2901029f64997a32757e15a8d05}{MAX30101\+\_\+\+Init\+SPO2\+Lite}, Sys\+Tick\+\_\+\+Handler 
+\end{DoxySeeAlso}
+
+
+Definition in file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+
+
+\label{doc-define-members}
+\Hypertarget{main_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{main_8c_a5fd0f310120c34ad942fb3e34c105760}\index{main.c@{main.c}!SYSTICK\_FREQ\_HZ@{SYSTICK\_FREQ\_HZ}}
+\index{SYSTICK\_FREQ\_HZ@{SYSTICK\_FREQ\_HZ}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{SYSTICK\_FREQ\_HZ}{SYSTICK\_FREQ\_HZ}}
+{\footnotesize\ttfamily \label{main_8c_a5fd0f310120c34ad942fb3e34c105760} 
+\+\#define SYSTICK\+\_\+\+FREQ\+\_\+\+HZ~50}
+
+Sys\+Tick interrupt frequency (Hz) \begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00026}{26}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{main_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8c_a840291bc02cba5474a4cb46a9b9566fe}\index{main.c@{main.c}!main@{main}}
+\index{main@{main}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily \label{main_8c_a840291bc02cba5474a4cb46a9b9566fe} 
+int main (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00071}{71}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+\Hypertarget{main_8c_ab5e09814056d617c521549e542639b7e}\index{main.c@{main.c}!SysTick\_Handler@{SysTick\_Handler}}
+\index{SysTick\_Handler@{SysTick\_Handler}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{SysTick\_Handler()}{SysTick\_Handler()}}
+{\footnotesize\ttfamily \label{main_8c_ab5e09814056d617c521549e542639b7e} 
+void Sys\+Tick\+\_\+\+Handler (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00140}{140}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+
+
+\label{doc-var-members}
+\Hypertarget{main_8c_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{main_8c_a94211eb6e46fe516cad28f8740e34377}\index{main.c@{main.c}!data\_ready@{data\_ready}}
+\index{data\_ready@{data\_ready}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{data\_ready}{data\_ready}}
+{\footnotesize\ttfamily \label{main_8c_a94211eb6e46fe516cad28f8740e34377} 
+volatile uint8\+\_\+t data\+\_\+ready = 0}
+
+Flag set by Sys\+Tick\+\_\+\+Handler when new data is available for processing in main loop \begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00028}{28}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+\Hypertarget{main_8c_af0893b95cb870eaed882ea9bc14d8ace}\index{main.c@{main.c}!MAX30101\_SingleSampleCurrentSpO2@{MAX30101\_SingleSampleCurrentSpO2}}
+\index{MAX30101\_SingleSampleCurrentSpO2@{MAX30101\_SingleSampleCurrentSpO2}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{MAX30101\_SingleSampleCurrentSpO2}{MAX30101\_SingleSampleCurrentSpO2}}
+{\footnotesize\ttfamily \label{main_8c_af0893b95cb870eaed882ea9bc14d8ace} 
+\doxymbox{\hyperlink{struct_m_a_x30101___sample_current_sp_o2}{MAX30101\+\_\+\+Sample\+Current\+Sp\+O2}} MAX30101\+\_\+\+Single\+Sample\+Current\+Sp\+O2}
+
+
+
+FINAL PROCESSED DATA:\+ Calibrated current in nanoamps (nA). 
+
+32-\/sample buffer holding calibrated photodiode current values (0–2048 nA). This is the primary output buffer for post-\/processing and external transmission. Updated by Sys\+Tick ISR approximately every 20 ms (variable latency based on FIFO fill). \begin{DoxySeeAlso}{See also}
+Sys\+Tick\+\_\+\+Handler 
+\end{DoxySeeAlso}
+\begin{DoxyNote}{Note}
+Sp\+O2 mode memory:\+ 8 samples × 8 bytes (2 × float32\+\_\+t) = 64 bytes 
+
+Typically accessed in main loop after ISR completion 
+\end{DoxyNote}
+\begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00041}{41}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+\Hypertarget{main_8c_a0d616c40e131213e4db5d256f1d24e29}\index{main.c@{main.c}!tx\_buffer@{tx\_buffer}}
+\index{tx\_buffer@{tx\_buffer}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{tx\_buffer}{tx\_buffer}}
+{\footnotesize\ttfamily \label{main_8c_a0d616c40e131213e4db5d256f1d24e29} 
+char tx\+\_\+buffer\+[100]\+}
+
+General-\/purpose buffer for UART transmission \begin{Desc}
+\item[Examples]\par
+\doxymbox{\hyperlink{_2_users_2juliofajardo_2_documents_2_a_r_m_2_slides_nuevos_2_n_i_r_s-_m_a_x30101_2_project_2main_8c-example}{/\+\+Users/\+juliofajardo/\+\+Documents/\+\+ARM/\+\+Slides\+Nuevos/\+\+NIRS-\/\+MAX30101/\+\+Project/\+main.\+c}}.\end{Desc}
+
+
+Definition at line \doxymbox{\hyperlink{main_8c_source_l00030}{30}} of file \doxymbox{\hyperlink{main_8c_source}{main.\+c}}.
+
