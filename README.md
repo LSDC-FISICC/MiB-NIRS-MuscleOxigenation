@@ -1,11 +1,10 @@
-# MiB-NIRS-MuscleOxigenation
-A dual-mode firmware application for real-time monitoring of muscle oxygenation (NIRS) and blood oxygen saturation (SpO2) using the Maxim Integrated MAX30101 optical sensor interfaced to the STM32F303K8 microcontroller for biomechanical and physiological analysis.
+# MiB-NIRS-MuscleHemodynamics
+A dual-mode firmware application for real-time monitoring of muscle hemodynamics through NIRS or blood oxygen saturation (SpO2) using the Maxim Integrated MAX30101 optical sensor interfaced to the STM32F303K8 microcontroller for biomechanical and physiological analysis.
 
 ## Overview
 
-This project implements dual-mode optical spectroscopy monitoring:
-- **SpO2 Lite Mode** *(active)*: Pulse oximetry with dual-channel (Red/IR) measurement — current configuration at 1.6 mA per LED
-- **MuscleOx Mode**: Near-Infrared Spectroscopy (NIRS) with tri-channel (Red/IR/Green) measurement for muscle oxygenation and hemodynamics
+This project implements a single-mode optical spectroscopy monitoring:
+- **NIRS Lite Mode** *(active)*: NIRS-based hemodynamics monitoring or pulse oximetry with dual-channel (Red/IR) measurement — current configuration at 1.6 mA per LED
 
 The system uses the Maxim Integrated MAX30101 optical sensor interfaced via I2C to the STM32F303K8 ARM Cortex-M4 microcontroller, achieving real-time 16-bit ADC sampling at 50 Hz with 31.25 pA resolution. Calibrated photodiode current values (nA) are streamed over UART as CSV at 460800 baud.
 
@@ -17,7 +16,7 @@ The system uses the Maxim Integrated MAX30101 optical sensor interfaced via I2C 
 - **Status LED**: GPIO PB3 (push-pull output, 25 Hz blink via 20 ms SysTick toggle)
 
 ### Optical Sensor
-- **Device**: Maxim Integrated MAX30101 (Pulse Oximetry / NIRS)
+- **Device**: Maxim Integrated MAX30101 (Pulse Oximetry / NIRS-based Hemodynamics)
 - **I2C Address**: 0xAE (7-bit: 0x57)
 - **ADC**: 16-bit, 2048 nA full-scale, 31.25 pA LSB resolution
 - **Sample Rate**: 50 Hz (ODR), 118 µs pulse width

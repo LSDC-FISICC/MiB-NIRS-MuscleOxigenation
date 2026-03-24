@@ -52,164 +52,90 @@
 
 /**
  * @struct MAX30101_Sample
- * @brief Raw FIFO sample data directly read from sensor (6 bytes) in multi-LED mode
- * @details Intermediate storage for raw 2-byte ADC values from each LED channel.
- *          Format: 3 channels × 2 bytes (MSB, LSB) per sample
- *          Total: 6 bytes per complete sample in multi-LED mode
- * @note Use MAX30101_ReadFIFO() to populate this structure
- * @see MAX30101_ReadFIFO, MAX30101_ConvertSampleToUint16
- */
-typedef struct {
-    uint8_t red[2];      /**< Red LED ADC raw bytes (MSB, LSB) */
-    uint8_t ir[2];       /**< IR LED ADC raw bytes (MSB, LSB) */
-    uint8_t green[2];    /**< Green LED ADC raw bytes (MSB, LSB) */
-} MAX30101_Sample;
-
-/**
- * @struct MAX30101_SampleData
- * @brief 16-bit unsigned integer representation of ADC counts
- * @details Intermediate format after combining 2 raw bytes per channel.
- *          Range: 0 to 65535 (16-bit ADC counts)
- *          Represents: Photodiode current as raw ADC values
- * @note Use MAX30101_ConvertSampleToUint16() to convert from raw samples
- * @see MAX30101_ConvertSampleToUint16, MAX30101_ReadFIFO_Current
- */
-typedef struct {
-    uint16_t red;        /**< Red LED 16-bit value as uint16_t */
-    uint16_t ir;         /**< IR LED 16-bit value as uint16_t */
-    uint16_t green;      /**< Green LED 16-bit value as uint16_t */
-} MAX30101_SampleData;
-
-/**
- * @struct MAX30101_SampleCurrent
- * @brief Calibrated photodiode current in nanoamps (nA)
- * @details Final processed format: ADC values scaled to current using 31.25 pA LSB.
- *          Range: 0 to 2048 nA (full-scale current)
- *          Resolution: 0.03125 nA per LSB (16-bit ADC, 2048 nA full-scale)
- * @note Use MAX30101_ReadFIFO_Current() or MAX30101_ConvertUint16ToCurrent() to generate
- * @see MAX30101_ReadFIFO_Current, MAX30101_ConvertUint16ToCurrent
- */
-typedef struct {
-    float32_t red;       /**< Red LED current (0–2048 nA) */
-    float32_t ir;        /**< IR LED current (0–2048 nA) */
-    float32_t green;     /**<Green LED current (0–2048 nA) */
-} MAX30101_SampleCurrent;
-
-/**
- * @struct MAX30101_SampleSpO2
- * @brief Raw FIFO sample data for SpO2 mode (4 bytes)
+ * @brief Raw FIFO sample data for NIRS mode (4 bytes)
  * @details Dual-LED mode uses Red + IR channels.
  *          Format: 2 channels × 2 bytes (MSB, LSB)
  *          Total: 4 bytes per sample.
- * @note Use MAX30101_ReadFIFO() with SpO2 mode or a dedicated SpO2 read function
+ * @note Use MAX30101_ReadFIFO() with NIRS mode or a dedicated NIRS read function
  */
 typedef struct {
     uint8_t red[2];      /**< Red LED raw bytes (MSB, LSB) */
     uint8_t ir[2];       /**< IR LED raw bytes (MSB, LSB) */
-} MAX30101_SampleSpO2;
+} MAX30101_Sample;
 
 /**
- * @struct MAX30101_SampleDataSpO2
- * @brief 16-bit ADC counts for SpO2 mode
+ * @struct MAX30101_SampleData
+ * @brief 16-bit ADC counts for NIRS mode
  * @details Dual-LED data format after byte packing.
- * @note Use MAX30101_ConvertSampleToUint16() with SpO2 struct or a SpO2 conversion routine
+ * @note Use MAX30101_ConvertSampleToUint16() with NIRS struct or a NIRS conversion routine
  */
 typedef struct {
     uint16_t red;        /**< Red ADC 16-bit value */
     uint16_t ir;         /**< IR ADC 16-bit value */
-} MAX30101_SampleDataSpO2;
+} MAX30101_DataSample;
 
 /**
- * @struct MAX30101_SampleCurrentSpO2
- * @brief Calibrated photodiode current in nA for SpO2 mode
+ * @struct MAX30101_SampleCurrent
+ * @brief Calibrated photodiode current in nA for NIRS mode
  * @details Same 7.81 pA LSB scaling as multi-LED mode.
  */
 typedef struct {
     float32_t red;       /**< Red current (0–2048 nA) */
     float32_t ir;        /**< IR current (0–2048 nA) */
-} MAX30101_SampleCurrentSpO2;
+} MAX30101_CurrentSample;
 
 /**
- * @brief Initialize MAX30101 in SpO2 mode (dual-LED: Red + IR)
+ * @brief Initialize MAX30101 for NIRS muscle oxygenation (dual-LED: Red + IR)
  * @details Configures sensor for blood oxygen measurement with low power consumption.
  *          Sample rate: 50 Hz, FIFO rollover enabled, configurable LED power.
  * @param ledPower_red - Red LED current value (0.0 to 51 mA range)
  * @param ledPower_ir - IR LED current value (0.0 to 51 mA range)
- * @note Call once at startup before MAX30101_ReadFIFO_CurrentSpO2()
- * @see MAX30101_InitMuscleOx
+ * @note Call once at startup before MAX30101_ReadSingleCurrent()
+ * @see MAX30101_InitNIRSLite, MAX30101_ReadSingleCurrent
+ * @example
+ *   MAX30101_InitNIRSLite(1.6f, 1.6f);  // 1.6 mA per LED for low power operation
  */
-void MAX30101_InitSPO2Lite(float32_t ledPower_red, float32_t ledPower_ir);
+void MAX30101_InitNIRSLite(float32_t ledPower_red, float32_t ledPower_ir);
 
 /**
- * @brief Initialize MAX30101 for NIRS muscle oxygenation (multi-LED: Red + IR + Green)
- * @details Configures sensor for tissue oxygenation measurement with 3 LEDs.
- *          Sample rate: 50 Hz, FIFO rollover enabled, configurable LED power.
- * @param ledPower_red - Red LED current value (0.0 to 51 mA range)
- * @param ledPower_ir - IR LED current value (0.0 to 51 mA range)
- * @param ledPower_green - Green LED current value (0.0 to 51 mA range)
- * @note Call once at startup before MAX30101_ReadFIFO_Current()
- * @see MAX30101_InitSPO2Lite
+ * @brief Get number of available samples in FIFO
+ * @return Number of unread samples (0-32)
  */
-void MAX30101_InitMuscleOx(float32_t ledPower_red, float32_t ledPower_ir, float32_t ledPower_green);
-
 uint8_t MAX30101_GetNumAvailableSamples(void);
-/**< Query number of unread samples in FIFO (0-32) */
 
+/**
+ * @brief Update FIFO read pointer
+ * @param num_samples Number of samples to advance read pointer
+ */
 void MAX30101_UpdateReadPointer(uint8_t num_samples);
-/**< Advance FIFO read pointer by num_samples with wrap-around */
-
-// Conversion functions for SpO2 mode (Red + IR)
 /**
- * @brief Convert raw SpO2 bytes to 16-bit ADC counts (0-65535)
- * @param sample_in - [in] MAX30101_SampleSpO2 with raw byte pairs
- * @param sample_out - [out] MAX30101_SampleDataSpO2 with uint16 counts
+ * @brief Convert raw NIRS sample bytes to 16-bit ADC counts
+ * @param sample_in Pointer to MAX30101_Sample with raw byte data
+ * @param sample_out Pointer to MAX30101_DataSample for output counts
  */
-void MAX30101_ConvertSampleToUint16SpO2(MAX30101_SampleSpO2 *sample_in, MAX30101_SampleDataSpO2 *sample_out);
+void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_DataSample *sample_out);
 
 /**
- * @brief Convert SpO2 ADC counts to current in nanoamps (0-2048 nA)
- * @param sample_in - [in] MAX30101_SampleDataSpO2 with ADC counts
- * @param sample_out - [out] MAX30101_SampleCurrentSpO2 with nA values
+ * @brief Convert NIRS ADC counts to current in nanoamps (0-2048 nA)
+ * @param sample_in - [in] MAX30101_DataSample with ADC counts
+ * @param sample_out - [out] MAX30101_CurrentSample with nA values
  */
-void MAX30101_ConvertUint16ToCurrentSpO2(MAX30101_SampleDataSpO2 *sample_in, MAX30101_SampleCurrentSpO2 *sample_out);
+void MAX30101_ConvertUint16ToCurrent(MAX30101_DataSample *sample_in, MAX30101_CurrentSample *sample_out);
 
 /**
- * @brief Read single SpO2 sample from FIFO with current conversion
- * @details Optimized single-sample read converting 4 bytes directly to nanoamps
- * @param sample - [out] MAX30101_SampleCurrentSpO2 (Red, IR nA values)
- * @see MAX30101_GetNumAvailableSamples to check for available data
- */
-void MAX30101_ReadSingleCurrentSpO2(MAX30101_SampleCurrentSpO2 *sample);
-
-/**
- * @brief Read single SpO2 sample from FIFO as 16-bit ADC counts
+ * @brief Read single NIRS sample from FIFO as 16-bit ADC counts
  * @details Optimized single-sample read returning raw ADC values (0-65535)
- * @param sample - [out] MAX30101_SampleDataSpO2 with 16-bit ADC counts
+ * @param sample - [out] MAX30101_DataSample with 16-bit ADC counts
  * @see MAX30101_GetNumAvailableSamples to check for available data
  */
-void MAX30101_ReadSingleDataSpO2(MAX30101_SampleDataSpO2 *sample);
-
-// Conversion functions for multi-LED mode (Red + IR + Green)
-/**
- * @brief Convert raw multi-LED bytes to 16-bit ADC counts (0-65535)
- * @param sample_in - [in] MAX30101_Sample with raw byte pairs (6 bytes)
- * @param sample_out - [out] MAX30101_SampleData with uint16 counts (3 channels)
- */
-void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_SampleData *sample_out);
+void MAX30101_ReadSingleData(MAX30101_DataSample *sample);
 
 /**
- * @brief Convert multi-LED ADC counts to current in nanoamps (0-2048 nA)
- * @param sample_in - [in] MAX30101_SampleData with ADC counts
- * @param sample_out - [out] MAX30101_SampleCurrent with nA values (Red, IR, Green)
- */
-void MAX30101_ConvertUint16ToCurrent(MAX30101_SampleData *sample_in, MAX30101_SampleCurrent *sample_out);
-
-/**
- * @brief Read single multi-LED sample from FIFO with current conversion
- * @details Optimized single-sample read converting 6 bytes directly to nanoamps
- * @param sample - [out] MAX30101_SampleCurrent (Red, IR, Green nA values)
+ * @brief Read single NIRS sample from FIFO with current conversion
+ * @details Optimized single-sample read converting 4 bytes directly to nanoamps
+ * @param sample - [out] MAX30101_CurrentSample (Red, IR nA values)
  * @see MAX30101_GetNumAvailableSamples to check for available data
  */
-void MAX30101_ReadSingleCurrent(MAX30101_SampleCurrent *sample);
+void MAX30101_ReadSingleCurrentData(MAX30101_CurrentSample *sample);
 
 #endif /* MAX30101_H_ */  

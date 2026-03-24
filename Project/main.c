@@ -8,7 +8,7 @@
  * @author Julio Fajardo, PhD
  * @date 2024-06-01
  * @version 1.0
- * @see clk_config, LED_config, I2C1_Config, MAX30101_InitSPO2Lite, SysTick_Handler
+ * @see clk_config, LED_config, I2C1_Config, MAX30101_InitNIRSLite, SysTick_Handler
  */
 
 #include "stm32f303x8.h"
@@ -38,7 +38,7 @@ char tx_buffer[100];  /**< General-purpose buffer for UART transmission */
  *          @note SpO2 mode memory: 8 samples × 8 bytes (2 × float32_t) = 64 bytes
  *          @note Typically accessed in main loop after ISR completion
  */
-MAX30101_SampleCurrentSpO2 MAX30101_SingleSampleCurrentSpO2; 
+MAX30101_CurrentSample MAX30101_NIRS_SingleCurrentSample; 
 
 /**
  * @brief System initialization and main control loop
@@ -46,7 +46,7 @@ MAX30101_SampleCurrentSpO2 MAX30101_SingleSampleCurrentSpO2;
  *          1. **Clock**: PLL to 64 MHz (HSI 8 MHz × 16)
  *          2. **GPIO**: Status LED on PB3 (push-pull output)
  *          3. **I2C1**: 400 kHz fast-mode on PB6 (SCL), PB7 (SDA)
- *          4. **Sensor**: MAX30101 SpO2 Lite mode — Red + IR at 50 Hz, 1.6 mA each
+ *          4. **Sensor**: MAX30101 NIRS Lite mode — Red + IR at 50 Hz, 1.6 mA each
  *          5. **UART**: USART2 at 460800 baud (PA2=TX, PA15=RX)
  *          6. **Timer**: SysTick at 50 Hz (20 ms period), enabling the acquisition ISR
  *
@@ -63,7 +63,7 @@ MAX30101_SampleCurrentSpO2 MAX30101_SingleSampleCurrentSpO2;
  * @execution
  *   - Blocking operations during init: PLL lock (~few µs), I2C configuration
  *   - Time to first ISR: ~20 ms after SysTick_Config()
- * @see clk_config, LED_config, I2C1_Config, MAX30101_InitSPO2Lite, SysTick_Handler
+ * @see clk_config, LED_config, I2C1_Config, MAX30101_InitNIRSLite, SysTick_Handler
  * @example
  *   // After init, main loop outputs one line per sample at 50 Hz:
  *   // "1234.567,2345.678\r\n"  (Red nA, IR nA)
@@ -75,8 +75,8 @@ int main(void) {
     LED_config();
     // Configure I2C1 (400 kHz) for MAX30101 communication
     I2C1_Config();
-    // Initialize MAX30101 for SpO2 measurement with medium LED power
-    MAX30101_InitSPO2Lite(1.6f,1.6f);  // 1.6 mA LED current for low power operation (up to 51 mA max)
+    // Initialize MAX30101 for NIRS measurement with medium LED power
+    MAX30101_InitNIRSLite(1.6f,1.6f);  // 1.6 mA LED current for low power operation (up to 51 mA max)
     // Configure USART2 (PA2=TX, PA15=RX) at 460800 baud for data transmission
     UART_Config(460800);
     // Configure SysTick for 20 ms interrupts (SYSTICK_FREQ_HZ = 50 Hz)
@@ -85,7 +85,7 @@ int main(void) {
     // Main loop: real work happens in SysTick_Handler ISR
     for (;;) {
         if(data_ready) {
-            sprintf(tx_buffer, "%.3f,%.3f\r\n", MAX30101_SingleSampleCurrentSpO2.red, MAX30101_SingleSampleCurrentSpO2.ir);
+            sprintf(tx_buffer, "%.4f,%.4f\r\n", MAX30101_NIRS_SingleCurrentSample.red, MAX30101_NIRS_SingleCurrentSample.ir);
             USART2_putString(tx_buffer);
             data_ready = 0; // Reset flag after transmission
         }
@@ -113,7 +113,7 @@ int main(void) {
  *
  * @data_output
  *       Upon samples available:
- *       - Populates MAX30101_SingleSampleCurrentSpO2 (Red, IR fields in nanoamps)
+ *       - Populates MAX30101_NIRS_SingleCurrentSample (Red, IR fields in nanoamps)
  *       - Sets data_ready = 1 to signal main loop
  *       - Data valid until next ISR fires (~20 ms window)
  *
@@ -130,17 +130,17 @@ int main(void) {
  *         optimize away the flag check in the main loop (undefined behavior in C).
  *       - I2C blocking: If I2C bus is busy, ISR execution may extend by several ms
  *
- * @see MAX30101_GetNumAvailableSamples, MAX30101_ReadSingleCurrentSpO2, LED_Toggle
+ * @see MAX30101_GetNumAvailableSamples, MAX30101_ReadSingleCurrentData, LED_Toggle
  * @example
  *   // ISR fires every 20 ms (50 Hz), synchronized to sensor output
- *   // MAX30101_SingleSampleCurrentSpO2 updated with one fresh Red/IR nA pair
+ *   // MAX30101_NIRS_SingleCurrentSample updated with one fresh Red/IR nA pair
  *   // LED toggles each tick → 25 Hz blink (20 ms on, 20 ms off)
  */
 
 void SysTick_Handler(void) {
     uint8_t available_samples = MAX30101_GetNumAvailableSamples();
     if (available_samples > 0) {
-        MAX30101_ReadSingleCurrentSpO2(&MAX30101_SingleSampleCurrentSpO2);
+        MAX30101_ReadSingleCurrentData(&MAX30101_NIRS_SingleCurrentSample);
         MAX30101_UpdateReadPointer(available_samples);
         data_ready = 1; // Set flag for main loop to process new data
     }
