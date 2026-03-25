@@ -4,8 +4,8 @@
  * @details Complete driver for Maxim Integrated MAX30101 optical sensor supporting:
  *          - Multi-LED mode (Red, IR, Green) for NIRS measurements
  *          - Dual-LED mode (Red, IR) for SpO2 measurements
- *          - Direct current readout in nanoamps (nA) with 31.25 pA resolution (16-bit ADC)
- *          - 16-bit ADC with 2048 nA full-scale range
+ *          - Direct current readout in nanoamps (nA) with 15.625 pA resolution (18-bit ADC)
+ *          - 18-bit ADC with 4096 nA full-scale range
  *          - 32-sample FIFO with wrap-around support
  * @author Julio Fajardo, PhD
  * @date 2024-06-01
@@ -44,44 +44,44 @@
 
 #define     BUFFERBLOCKSIZE     0x8
 #define     MAX30101_ADC_VREF   3.3f        /**< ADC reference voltage in volts */
-#define     MAX30101_ADC_BITS   16          /**< ADC resolution in bits */
-#define     MAX30101_ADC_MAX    ((1 << MAX30101_ADC_BITS) - 1)  /**< Max ADC count (65535 for 16-bit) */
-#define     MAX30101_CURRENT_LSB_PA  31.25f  /**< LSB size in picoamps (pA) */
+#define     MAX30101_ADC_BITS   18          /**< ADC resolution in bits */
+#define     MAX30101_ADC_MAX    ((1 << MAX30101_ADC_BITS) - 1)  /**< Max ADC count (262143 for 18-bit) */
+#define     MAX30101_CURRENT_LSB_PA  15.625f  /**< LSB size in picoamps (pA): 4096 nA / 2^18 */
 #define     MAX30101_CURRENT_LSB_NA  (MAX30101_CURRENT_LSB_PA / 1000.0f)  /**< LSB size in nanoamps (nA) */
-#define     MAX30101_CURRENT_FULLSCALE  2048.0f  /**< Full scale current range in nanoamps (nA) */
+#define     MAX30101_CURRENT_FULLSCALE  4096.0f  /**< Full scale current range in nanoamps (nA) */
 
 /**
  * @struct MAX30101_Sample
- * @brief Raw FIFO sample data for NIRS mode (4 bytes)
+ * @brief Raw FIFO sample data for NIRS mode (6 bytes)
  * @details Dual-LED mode uses Red + IR channels.
- *          Format: 2 channels × 2 bytes (MSB, LSB)
- *          Total: 4 bytes per sample.
+ *          Format: 2 channels × 3 bytes (MSB, LSB, unused)
+ *          Total: 6 bytes per sample.
  * @note Use MAX30101_ReadFIFO() with NIRS mode or a dedicated NIRS read function
  */
 typedef struct {
-    uint8_t red[2];      /**< Red LED raw bytes (MSB, LSB) */
-    uint8_t ir[2];       /**< IR LED raw bytes (MSB, LSB) */
+    uint8_t red[3];      /**< Red LED raw bytes (MSB, LSB) */
+    uint8_t ir[3];       /**< IR LED raw bytes (MSB, LSB) */
 } MAX30101_Sample;
 
 /**
  * @struct MAX30101_SampleData
- * @brief 16-bit ADC counts for NIRS mode
+ * @brief 32-bit ADC counts for NIRS mode
  * @details Dual-LED data format after byte packing.
- * @note Use MAX30101_ConvertSampleToUint16() with NIRS struct or a NIRS conversion routine
+ * @note Use MAX30101_ConvertSampleToUint32() with NIRS struct or a NIRS conversion routine
  */
 typedef struct {
-    uint16_t red;        /**< Red ADC 16-bit value */
-    uint16_t ir;         /**< IR ADC 16-bit value */
+    uint32_t red;        /**< Red ADC 32-bit value */
+    uint32_t ir;         /**< IR ADC 32-bit value */
 } MAX30101_DataSample;
 
 /**
  * @struct MAX30101_SampleCurrent
  * @brief Calibrated photodiode current in nA for NIRS mode
- * @details Same 7.81 pA LSB scaling as multi-LED mode.
+ * @details Same 15.63 pA LSB scaling as multi-LED mode.
  */
 typedef struct {
-    float32_t red;       /**< Red current (0–2048 nA) */
-    float32_t ir;        /**< IR current (0–2048 nA) */
+    float32_t red;       /**< Red current (0–4096 nA) */
+    float32_t ir;        /**< IR current (0–4096 nA) */
 } MAX30101_CurrentSample;
 
 /**
@@ -109,23 +109,23 @@ uint8_t MAX30101_GetNumAvailableSamples(void);
  */
 void MAX30101_UpdateReadPointer(uint8_t num_samples);
 /**
- * @brief Convert raw NIRS sample bytes to 16-bit ADC counts
+ * @brief Convert raw NIRS sample bytes to 32-bit ADC counts
  * @param sample_in Pointer to MAX30101_Sample with raw byte data
  * @param sample_out Pointer to MAX30101_DataSample for output counts
  */
-void MAX30101_ConvertSampleToUint16(MAX30101_Sample *sample_in, MAX30101_DataSample *sample_out);
+void MAX30101_ConvertSampleToUint32(MAX30101_Sample *sample_in, MAX30101_DataSample *sample_out);
 
 /**
- * @brief Convert NIRS ADC counts to current in nanoamps (0-2048 nA)
+ * @brief Convert NIRS ADC counts to current in nanoamps (0-4096 nA)
  * @param sample_in - [in] MAX30101_DataSample with ADC counts
  * @param sample_out - [out] MAX30101_CurrentSample with nA values
  */
-void MAX30101_ConvertUint16ToCurrent(MAX30101_DataSample *sample_in, MAX30101_CurrentSample *sample_out);
+void MAX30101_ConvertUint32ToCurrent(MAX30101_DataSample *sample_in, MAX30101_CurrentSample *sample_out);
 
 /**
- * @brief Read single NIRS sample from FIFO as 16-bit ADC counts
- * @details Optimized single-sample read returning raw ADC values (0-65535)
- * @param sample - [out] MAX30101_DataSample with 16-bit ADC counts
+ * @brief Read single NIRS sample from FIFO as 32-bit ADC counts
+ * @details Optimized single-sample read returning raw ADC values (0-4294967295)
+ * @param sample - [out] MAX30101_DataSample with 32-bit ADC counts
  * @see MAX30101_GetNumAvailableSamples to check for available data
  */
 void MAX30101_ReadSingleData(MAX30101_DataSample *sample);

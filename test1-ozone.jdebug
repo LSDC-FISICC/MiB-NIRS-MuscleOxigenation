@@ -5,7 +5,7 @@
 **********************************************************************
 
 File          : 
-Created       : 11. Feb 2026 15:41
+Created       : 24. Mar 2026 17:41
 Ozone Version : V3.40f
 */
 
@@ -22,19 +22,19 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.AddPathSubstitute ("/Users/juliofajardo/Documents/ARM/SlidesNuevos/Test1", "$(ProjectDir)");
-  Project.AddPathSubstitute ("/users/juliofajardo/documents/arm/slidesnuevos/test1", "$(ProjectDir)");
+  Project.AddPathSubstitute ("/Users/juliofajardo/Documents/ARM/SlidesNuevos/NIRS-MAX30101", "$(ProjectDir)");
+  Project.AddPathSubstitute ("/users/juliofajardo/documents/arm/slidesnuevos/nirs-max30101", "$(ProjectDir)");
   Project.SetDevice ("STM32F303K8");
-  Project.SetHostIF ("USB", "");
+  Project.SetHostIF ("USB", "775011756");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
+  Project.AddSvdFile ("/Users/juliofajardo/Documents/ARM/stm32f303.svd");
   //
   // User settings
   //
+  Edit.SysVar (VAR_HSS_SPEED, FREQ_100_HZ);
   File.Open ("$(ProjectDir)/out/Project/STM32F303K8Tx/Debug/Project.axf");
-  Edit.SysVar (VAR_POWER_SAMPLING_SPEED, FREQ_10_KHZ);
-  Edit.SysVar (VAR_HSS_SPEED, FREQ_10_KHZ);
 }
 
 /*********************************************************************

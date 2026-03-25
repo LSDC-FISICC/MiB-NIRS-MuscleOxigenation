@@ -31,7 +31,7 @@ char tx_buffer[100];  /**< General-purpose buffer for UART transmission */
 
 /**
  * @brief FINAL PROCESSED DATA: Calibrated current in nanoamps (nA)
- * @details 32-sample buffer holding calibrated photodiode current values (0–2048 nA).
+ * @details 32-sample buffer holding calibrated photodiode current values (0–4096nA).
  *          This is the primary output buffer for post-processing and external transmission.
  *          Updated by SysTick ISR approximately every 20 ms (variable latency based on FIFO fill).
  *          @see SysTick_Handler
@@ -77,7 +77,7 @@ int main(void) {
     // Configure I2C1 (400 kHz) for MAX30101 communication
     I2C1_Config();
     // Initialize MAX30101 for NIRS measurement with medium LED power
-    MAX30101_InitNIRSLite(1.6f,1.6f);  // 1.6 mA LED current for low power operation (up to 51 mA max)
+    MAX30101_InitNIRSLite(10.0f,10.0f);  // 10.0 mA LED current for low power operation (up to 51 mA max)
     // Configure USART2 (PA2=TX, PA15=RX) at 460800 baud for data transmission
     UART_Config(460800);
     // Configure SysTick for 20 ms interrupts (SYSTICK_FREQ_HZ = 50 Hz)
