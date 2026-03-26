@@ -27,9 +27,9 @@
 #define SYSTICK_FREQ_HZ     50 /**< SysTick interrupt frequency (Hz) */
 #define IIR_NUM_SECTIONS    2  /**< Number of biquad sections in the IIR filter */
 #define FILTER_TYPE         0  /**< Filter type identifier (1 for high-pass Butterworth, 0 for First-Order IIR High-Pass (DC-Blocker): H(z) = (1 - z^-1) / (1 - alpha*z^-1) */
-#define APLHA               0.95f /**< Alpha coefficient for first-order IIR DC-Blocker (0.95 corresponds to fc ~0.4 Hz at 50 Hz sampling, 0.995 corresponds to fc ~0.04 Hz at 50 Hz sampling) */
+#define ALPHA               0.95f /**< Alpha coefficient for first-order IIR DC-Blocker (0.95 corresponds to fc ~0.4 Hz at 50 Hz sampling, 0.995 corresponds to fc ~0.04 Hz at 50 Hz sampling) */
 
-volatile uint8_t data_ready = 1; /**< Flag set by SysTick_Handler when new data is available for processing in main loop */
+volatile uint8_t data_ready = 0; /**< Flag set by SysTick_Handler when new data is available for processing in main loop */
 
 char tx_buffer[128];  /**< General-purpose buffer for UART transmission */
 
@@ -44,8 +44,8 @@ char tx_buffer[128];  /**< General-purpose buffer for UART transmission */
  */
 
  /** Global variables for storing current samples */
-MAX30101_CurrentSample MAX30101_NIRS_SingleCurrentSample;
-MAX30101_CurrentSample MAX30101_NIRS_FilteredSingleCurrentSample;
+volatile MAX30101_CurrentSample MAX30101_NIRS_SingleCurrentSample;
+volatile MAX30101_CurrentSample MAX30101_NIRS_FilteredSingleCurrentSample;
 
 /** Butterworth High-pass (dc-blocker) IIR Filter Coefficients 
     * @details 4th-order Butterworth high-pass filter with 0.04 Hz cutoff frequency, designed using MATLAB's fdesign.highpass and implemented as a cascade of biquads.
@@ -129,21 +129,21 @@ int main(void) {
     // Main loop: real work happens in SysTick_Handler ISR
     for (;;) {
         if(data_ready) {
+            data_ready = 0; // Clear flag for next ISR cycle
             #if FILTER_TYPE == 1
                 arm_biquad_cascade_df2T_f32(&IIR_Red, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.red, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.red, 1);
                 arm_biquad_cascade_df2T_f32(&IIR_IR, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.ir, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.ir, 1);
             #else
-                float32_t w_red_new = MAX30101_NIRS_SingleCurrentSample.red + APLHA * w_red;
+                float32_t w_red_new = MAX30101_NIRS_SingleCurrentSample.red + ALPHA * w_red;
                 MAX30101_NIRS_FilteredSingleCurrentSample.red = w_red_new - w_red;
                 w_red = w_red_new;
 
-                float32_t w_ir_new = MAX30101_NIRS_SingleCurrentSample.ir + APLHA * w_ir;
+                float32_t w_ir_new = MAX30101_NIRS_SingleCurrentSample.ir + ALPHA * w_ir;
                 MAX30101_NIRS_FilteredSingleCurrentSample.ir = w_ir_new - w_ir;
                 w_ir = w_ir_new;
             #endif
             sprintf(tx_buffer, "%.4f,%.4f\r\n", MAX30101_NIRS_FilteredSingleCurrentSample.red, MAX30101_NIRS_FilteredSingleCurrentSample.ir);
             USART2_putString(tx_buffer);
-            data_ready = 0; // Reset flag after transmission
         }
     }
 }
@@ -196,7 +196,7 @@ int main(void) {
 void SysTick_Handler(void) {
     uint8_t available_samples = MAX30101_GetNumAvailableSamples();
     if (available_samples > 0) {
-        MAX30101_ReadSingleCurrentData(&MAX30101_NIRS_SingleCurrentSample);
+        MAX30101_ReadSingleCurrentData((MAX30101_CurrentSample *)&MAX30101_NIRS_SingleCurrentSample);
         MAX30101_UpdateReadPointer(available_samples);
         data_ready = 1; // Set flag for main loop to process new data
     }
