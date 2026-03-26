@@ -188,3 +188,4 @@ void MAX30101_ReadSingleCurrentData(MAX30101_CurrentSample *sample) {
     temp = ((uint32_t)(fifo_data[3] & 0x3) << 16) | ((uint32_t)fifo_data[4] << 8) | fifo_data[5];
     sample->ir = (float32_t)temp * MAX30101_CURRENT_LSB_NA;
 }
+

@@ -138,4 +138,22 @@ void MAX30101_ReadSingleData(MAX30101_DataSample *sample);
  */
 void MAX30101_ReadSingleCurrentData(MAX30101_CurrentSample *sample);
 
+/** @brief First-order IIR DC-Blocker filter function
+ * @details Implements a simple first-order IIR high-pass filter to remove DC offset from the raw current samples.
+ *          The filter is defined by the difference equation: y[n] = x[n] - x[n-1] + ALPHA * y[n-1], where ALPHA controls the cutoff frequency.
+ *          This is a computationally efficient alternative to the biquad-based Butterworth filter, suitable for real-time processing on resource-constrained microcontrollers.
+ *          The state variable w holds the previous input sample and is updated with each new sample.
+ * @param x  Current input sample (raw current in nA)
+ * @param w  Pointer to the filter state variable (updated in place)
+ * @return Filtered output sample with DC removed
+ * @note ALPHA = 0.95 corresponds to a cutoff frequency of approximately 0.4 Hz at a sampling rate of 50 Hz, while ALPHA = 0.995 corresponds to a cutoff frequency of approximately 0.04 Hz at a sampling rate of 50 Hz.
+ */
+static inline float32_t MAX30101_FirstOrderDC_Blocker(float32_t x, float32_t *w, float32_t alpha)
+{
+    float32_t w_new = x + alpha * (*w);
+    float32_t y     = w_new - *w;
+    *w = w_new;
+    return y;
+}
+
 #endif /* MAX30101_H_ */  

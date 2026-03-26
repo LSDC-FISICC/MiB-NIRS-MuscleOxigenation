@@ -134,13 +134,8 @@ int main(void) {
                 arm_biquad_cascade_df2T_f32(&IIR_Red, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.red, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.red, 1);
                 arm_biquad_cascade_df2T_f32(&IIR_IR, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.ir, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.ir, 1);
             #else
-                float32_t w_red_new = MAX30101_NIRS_SingleCurrentSample.red + ALPHA * w_red;
-                MAX30101_NIRS_FilteredSingleCurrentSample.red = w_red_new - w_red;
-                w_red = w_red_new;
-
-                float32_t w_ir_new = MAX30101_NIRS_SingleCurrentSample.ir + ALPHA * w_ir;
-                MAX30101_NIRS_FilteredSingleCurrentSample.ir = w_ir_new - w_ir;
-                w_ir = w_ir_new;
+                MAX30101_NIRS_FilteredSingleCurrentSample.red = MAX30101_FirstOrderDC_Blocker(MAX30101_NIRS_SingleCurrentSample.red, &w_red, ALPHA);
+                MAX30101_NIRS_FilteredSingleCurrentSample.ir  = MAX30101_FirstOrderDC_Blocker(MAX30101_NIRS_SingleCurrentSample.ir,  &w_ir, ALPHA);
             #endif
             sprintf(tx_buffer, "%.4f,%.4f\r\n", MAX30101_NIRS_FilteredSingleCurrentSample.red, MAX30101_NIRS_FilteredSingleCurrentSample.ir);
             USART2_putString(tx_buffer);
@@ -202,3 +197,4 @@ void SysTick_Handler(void) {
     }
     LED_Toggle();
 }
+
