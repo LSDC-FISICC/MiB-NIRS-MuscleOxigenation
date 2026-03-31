@@ -28,8 +28,10 @@
 #define IIR_NUM_SECTIONS    2  /**< Number of biquad sections in the IIR filter */
 #define FILTER_TYPE         1  /**< Filter type identifier (1 for high-pass Chebyshev type II, 0 for First-Order IIR High-Pass (DC-Blocker): H(z) = (1 - z^-1) / (1 - alpha*z^-1) */
 #define ALPHA               0.95f /**< Alpha coefficient for first-order IIR DC-Blocker (0.95 corresponds to fc ~0.4 Hz at 50 Hz sampling, 0.995 corresponds to fc ~0.04 Hz at 50 Hz sampling) */
+#define WARMUP_SAMPLES      600 /**< Number of initial samples to process for filter warm-up before entering normal operation state */
 
 volatile uint8_t data_ready = 0; /**< Flag set by SysTick_Handler when new data is available for processing in main loop */
+uint8_t process_state = 0; /**< State 0 is for filter warm-up, 1 is for normal operation  */
 
 char tx_buffer[128];  /**< General-purpose buffer for UART transmission */
 
@@ -45,7 +47,7 @@ char tx_buffer[128];  /**< General-purpose buffer for UART transmission */
 
  /** Global variables for storing current samples */
 volatile MAX30101_CurrentSample MAX30101_NIRS_SingleCurrentSample;
-volatile MAX30101_CurrentSample MAX30101_NIRS_FilteredSingleCurrentSample;
+MAX30101_CurrentSample FilteredSample;
 
 /** Chebyshev High-pass (dc-blocker) IIR Filter Coefficients 
     * @details 4th-order Chebyshev type II high-pass filter with 0.04 Hz cutoff frequency, designed using MATLAB's fdesign.highpass and implemented as a cascade of biquads.
@@ -68,6 +70,9 @@ arm_biquad_cascade_df2T_instance_f32 IIR_IR; /**< CMSIS-DSP IIR filter instance 
 /* First-order DC-Blocker states */
 float32_t w_red = 0.0f; /**< First-order DC-Blocker intermediate state for red channel */
 float32_t w_ir  = 0.0f; /**< First-order DC-Blocker intermediate state for IR channel */
+
+/* Function prototypes */
+static inline void filter_warmup(const MAX30101_CurrentSample *s);
 
 /**
  * @brief System initialization and main control loop
@@ -130,14 +135,24 @@ int main(void) {
     for (;;) {
         if(data_ready) {
             data_ready = 0; // Clear flag for next ISR cycle
+            uint32_t primask = __get_PRIMASK();
+            __disable_irq(); // Disable interrupts to safely access shared data 
+            MAX30101_CurrentSample sample = (MAX30101_CurrentSample)MAX30101_NIRS_SingleCurrentSample;
+            __set_PRIMASK(primask); // Restore previous interrupt state
             #if FILTER_TYPE == 1
-                arm_biquad_cascade_df2T_f32(&IIR_Red, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.red, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.red, 1);
-                arm_biquad_cascade_df2T_f32(&IIR_IR, (float32_t *)&MAX30101_NIRS_SingleCurrentSample.ir, (float32_t *)&MAX30101_NIRS_FilteredSingleCurrentSample.ir, 1);
+                if(process_state) { // Normal operation: apply IIR filter to incoming samples
+                    arm_biquad_cascade_df2T_f32(&IIR_Red, (float32_t *)&sample.red, (float32_t *)&FilteredSample.red, 1);
+                    arm_biquad_cascade_df2T_f32(&IIR_IR, (float32_t *)&sample.ir, (float32_t *)&FilteredSample.ir, 1);
+                } else { // Filter warm-up: process initial samples to fill IIR state buffers before normal operation
+                    filter_warmup(&sample); // Process initial samples through the IIR filter to fill state buffers
+                    process_state = 1; // After warm-up, switch to normal operation
+                    continue; // Skip transmission during warm-up phase
+                }
             #else
-                MAX30101_NIRS_FilteredSingleCurrentSample.red = MAX30101_FirstOrderDC_Blocker(MAX30101_NIRS_SingleCurrentSample.red, &w_red, ALPHA);
-                MAX30101_NIRS_FilteredSingleCurrentSample.ir  = MAX30101_FirstOrderDC_Blocker(MAX30101_NIRS_SingleCurrentSample.ir,  &w_ir, ALPHA);
+                FilteredSample.red = MAX30101_FirstOrderDC_Blocker(sample.red, &w_red, ALPHA);
+                FilteredSample.ir  = MAX30101_FirstOrderDC_Blocker(sample.ir,  &w_ir, ALPHA);
             #endif
-            sprintf(tx_buffer, "%.4f,%.4f\r\n", MAX30101_NIRS_FilteredSingleCurrentSample.red, MAX30101_NIRS_FilteredSingleCurrentSample.ir);
+            sprintf(tx_buffer, "%.4f,%.4f\r\n", FilteredSample.red, FilteredSample.ir);
             USART2_putString(tx_buffer);
         }
     }
@@ -196,5 +211,30 @@ void SysTick_Handler(void) {
         data_ready = 1; // Set flag for main loop to process new data
     }
     LED_Toggle();
+}
+
+/**
+ * @brief Filter Warm-Up Routine
+ * @details This function can be called at startup to process initial samples through the IIR filter
+ *          to fill the state buffers before normal operation begins. This helps avoid transient artifacts
+ *          in the first few seconds of data.
+ *
+ * @param s Pointer to the current sample structure containing raw Red and IR values to be processed for warm-up.
+ * @return void
+ * @note This routine is typically called once at startup, before entering the main loop.
+ *       It processes a predefined number of samples (WARMUP_SAMPLES) through the IIR filter
+ *       without transmitting data, allowing the filter's internal state to stabilize.
+ *       After warm-up, the system transitions to normal operation where filtered data is transmitted.
+ *
+ * @see IIR_Red, IIR_IR, iirCoeffs, iirStatesRed, iirStatesIR
+ */
+static inline void filter_warmup(const MAX30101_CurrentSample *s) {
+    float32_t dummy;
+    float32_t red = s->red; // In this way the compiler keeps the sample values in registers across the loop iterations 
+    float32_t ir  = s->ir;  //minimizing memory access and maximizing warm-up speed
+    for (int i = 0; i < WARMUP_SAMPLES; i++) {
+        arm_biquad_cascade_df2T_f32(&IIR_Red, &red, &dummy, 1);
+        arm_biquad_cascade_df2T_f32(&IIR_IR,  &ir,  &dummy, 1);
+    }
 }
 
